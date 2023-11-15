@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <malloc.h>
 
 #if defined(USE_DISASM)
@@ -37,14 +38,11 @@
 #define     CREATE_TYPE(VALUE) \
 static TYPE* ARBITARY_TYPE ## VALUE(TYPE* NODE); \
 
-typedef struct TYPE
-{
-    CREATE_TYPE();
-};
+typedef struct TYPE;
 
 typedef struct EXPRESSION
 {
-    typedef EXPRESSION_TYPE* EXP_TYPE;
+    EXPRESSION_TYPE* EXP_TYPE;
 
     union 
     {
@@ -64,8 +62,8 @@ typedef struct EXPRESSION
 
 typedef struct OPCODE
 {
-	typedef OPCODE_TYPE* OPCODE_TYPE;
-	typedef CONDITION* CONDITION_TYPE;
+	OPCODE_TYPE* OPCODE_TYPE;
+	CONDITION* CONDITION_TYPE;
 	size_t* OPCODE_SIZE;
 
 	union 
@@ -74,13 +72,13 @@ typedef struct OPCODE
 		U32 INDEX_REGISTER;
 		size_t* OPERAND_SIZE;
 		EXPRESSION_TYPE* LITERAL;
-		bool IR_TO_AR;
+		bool* IR_TO_AR;
 
 	} OPERAND;
 	
 };
 
-typedef enum CONDITION
+typedef enum
 {
     CONDITION_TRUE,
 	CONDITION_FALSE,
@@ -98,9 +96,10 @@ typedef enum CONDITION
 	CONDITION_LESS_THAN,
 	CONDITION_GREATER_THAN,
 	CONDITION_LESS_OR_EQUAL,
-};
 
-typedef enum OPCODE_TYPE
+} CONDITION;
+
+typedef enum
 {
     OPCODE_ORI_TO_CCR,
 	OPCODE_ORI_TO_SR,
@@ -217,7 +216,8 @@ typedef enum OPCODE_TYPE
 	OPCODE_ROXR_SINGLE,
 	OPCODE_ROL_SINGLE,
 	OPCODE_ROR_SINGLE,
-};
+
+} OPCODE_TYPE;
 
 #define			OPERAND_NONE																	 0
 #define			OPERAND_DATA_REGISTER														1 << 0
@@ -237,7 +237,7 @@ typedef enum OPCODE_TYPE
 #define			OPERAND_USER_STACK_POINTER_REG_BASE											1 << 14
 #define			OPERAND_REGISTER_LIST														1 << 15	
 
-typedef enum EXPRESSION_TYPE
+typedef enum
 {
     EXPRESSION_SUBTRACT,
 	EXPRESSION_ADD,
@@ -267,7 +267,8 @@ typedef enum EXPRESSION_TYPE
 	EXPRESSION_PROGRAM_COUNTER_OF_EXPRESSION,
 	EXPRESSION_STRLEN,
 	EXPRESSION_DEF,
-};
+
+} EXPRESSION_TYPE;
 
 #endif
 #endif

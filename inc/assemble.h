@@ -22,7 +22,10 @@
 #else
 #define USE_ASM
 
-typedef struct
+#define         INSTRUCTION_EXEC(VALUE)                  \
+static INSTRUCTION* TYPE ## VALUE(int, char*, char*, int*)
+
+typedef struct ASSEMBLER
 {
     FILE* INPUT_FILE;
     FILE* OUTPUT_FILE;
@@ -31,6 +34,16 @@ typedef struct
     char IDENTIFIER;
 
 } ASSEMBLER;
+
+typedef struct FILE_SEMANTIC
+{
+    char* MNEMONIC;
+    char* INSTRUCTION_COUNT;
+    INSTRUCTION* INSTR_BASE;
+
+} FILE_SEMANTIC;
+
+void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_SEMANTIC);
 
 #endif
 #endif

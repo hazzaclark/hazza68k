@@ -51,6 +51,8 @@ typedef struct INSTRUCTION
 	char* SIZE;
 	char* FLAGS;
 	char NAME[MAX_CHAR];
+	bool PARSE_FLAG;
+	USHORT BYTEMASK;
 
 } INSTRUCTION;
 

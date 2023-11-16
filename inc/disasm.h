@@ -30,6 +30,9 @@
 #define     SIZE_QUAD       1 << 3
 #define     SIZE_UNDEF      1 << 4
 
+#define		MAX_CHAR		32
+#define		MAX_BIT_ARGS	256
+
 #if defined(TYPE_ARGS)
 #define TYPE_ARGS
 #else
@@ -38,7 +41,18 @@
 #define     CREATE_TYPE(VALUE) \
 static TYPE* ARBITARY_TYPE ## VALUE(TYPE* NODE); \
 
-typedef struct TYPE;
+typedef struct TYPE{};
+
+typedef struct INSTRUCTION
+{
+	S32 VALUE;
+	S32 SOURCE;
+	S32 DESTINATION;
+	char* SIZE;
+	char* FLAGS;
+	char NAME[MAX_CHAR];
+
+} INSTRUCTION;
 
 typedef struct EXPRESSION
 {
@@ -58,7 +72,8 @@ typedef struct EXPRESSION
 		char* IDENTIFIER;
 
 	} NODE;
-};
+
+} EXPRESSION;
 
 typedef struct OPCODE
 {
@@ -76,9 +91,9 @@ typedef struct OPCODE
 
 	} OPERAND;
 	
-};
+} OPCODE;
 
-typedef enum
+typedef enum CONDITION
 {
     CONDITION_TRUE,
 	CONDITION_FALSE,
@@ -99,7 +114,7 @@ typedef enum
 
 } CONDITION;
 
-typedef enum
+typedef enum OPCODE_TYPE
 {
     OPCODE_ORI_TO_CCR,
 	OPCODE_ORI_TO_SR,
@@ -237,7 +252,7 @@ typedef enum
 #define			OPERAND_USER_STACK_POINTER_REG_BASE											1 << 14
 #define			OPERAND_REGISTER_LIST														1 << 15	
 
-typedef enum
+typedef enum EXPRESSION_TYPE
 {
     EXPRESSION_SUBTRACT,
 	EXPRESSION_ADD,

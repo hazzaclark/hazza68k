@@ -61,7 +61,30 @@ void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT)
                 }
             }
         }
-        
+
+        FILE_STATE->WRITE_BUFFER = FILE_STATE->LINE_BUFFER;
+
+        /* ASSUMING THERE IS NO NEW LINE TO PARSE, WE HAVE REACHED THE END OF THE FILE */
+        /* AND OR THE LINE WAS TOO BIG FOR THE BUFFER TO ACCOUNT FOR */
+
+        /* THIS WILL PROVIDE THE NECESSARY UNIT TESTING FOR SUCH AN OCCURANCE */
+
+        if (NEWLINE_CHAR == '\0')
+        {
+            FILE_STATE->LINE_CHAR += 1, fgetc(INPUT);
+
+            if(FILE_STATE->LINE_CHAR == NULL)
+            {
+                printf(stderr, &FILE_STATE, "The line was too big to parse into the Internal Buffer\n");
+
+                /* READS NEW LINES UNTIL THE END OF THE FILE  */
+
+                while (FILE_STATE->LINE_CHAR != '\r' || '\n' || NULL)
+                {
+                    FILE_STATE->LINE_CHAR += 1, fgetc(INPUT);
+                }
+            }
+        }
     }
 }
 

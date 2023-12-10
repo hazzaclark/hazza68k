@@ -15,7 +15,9 @@
 
 /* SYSTEM INCLUDES */
 
+#include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 
 #if defined(USE_ASM)
 #define USE_ASM
@@ -25,28 +27,42 @@
 #define         INSTRUCTION_EXEC(VALUE)                  \
 static INSTRUCTION* TYPE ## VALUE(int, char*, char*, int*)
 
+#define         DIRECTIVE_CHARS         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789?_"
+#define         LABEL_CHARS             DIRECTIVE_CHARS ".@"
+
 typedef struct ASSEMBLER
 {
+    U32* GPR;
+    ULONG* PC;
+    char IDENTIFIER;
     FILE* INPUT_FILE;
     FILE* OUTPUT_FILE;
     FILE* LISTING_FILE;
     FILE* SYMBOL_FILE;
-    char IDENTIFIER;
+    U32* LISTING_COUNT;
 
 } ASSEMBLER;
 
 typedef struct FILE_SEMANTIC
 {
+    bool END_OF_FILE;
     char* MNEMONIC;
     char* INSTRUCTION_COUNT;
     char* WRITE_BUFFER;
     char* LINE_BUFFER[0];
+    char* SOURCE_LINE;
     INSTRUCTION* INSTR_BASE;
-    bool END_OF_FILE;
+    S32* LINE_CHAR;
 
 } FILE_SEMANTIC;
 
-void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT);
+typedef struct LINE_SEMNATIC
+{
+    
+
+} LINE_SEMNATIC;
+
+void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT, ASSEMBLER* ASSEMBLER);
 void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, const char* SOURCE);
 
 #endif

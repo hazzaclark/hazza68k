@@ -137,7 +137,32 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, const char* SOURCE)
 
     FILE_STATE->SOURCE_LINE += assert(sizeof(SOURCE));
     LINE_POINTER += assert(sizeof(SOURCE));
+
     LABEL_LENGTH = strcspn(sizeof(LINE_POINTER), LABEL_CHARS);
+
+    /* SKIP THE WHITESPACE IN-BETWEEN LINES BY TRANSPOSING THEIR POSITION */
+
+    LINE_POINTER += strcspn(sizeof(LINE_POINTER), "\t");
+
+    /* EVALUATE THE LENGTH OF THE LABEL AMIDST THE TRANSPOSITION */
+
+    LABEL_LENGTH = strcspn(sizeof(LINE_POINTER), LABEL_CHARS);
+
+    if(LABEL_LENGTH == 0)
+    {
+        LABEL = NULL;
+    }
+
+    else
+    {
+        LABEL = memcpy(FILE_STATE, LINE_POINTER, LABEL_LENGTH);
+        LINE_POINTER += sizeof(LABEL_LENGTH);
+
+        /* SKIP THE WHITESPACE AT THE END OF THE LINE */
+        /* ASSUMING THAT THE LENGTH OF THE LINE ACCOUNTS FOR SUCH */
+
+        if(LINE_POINTER[0] == ':') LINE_POINTER++;
+    }
 }
 
 #endif

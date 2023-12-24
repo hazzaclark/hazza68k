@@ -39,12 +39,12 @@ typedef struct ASSEMBLER
 {
     U32* GPR;
     ULONG* PC;
-    char IDENTIFIER;
     FILE* INPUT_FILE;
     FILE* OUTPUT_FILE;
     FILE* LISTING_FILE;
     FILE* SYMBOL_FILE;
     U32* LISTING_COUNT;
+    char IDENTIFIER;
 
 } ASSEMBLER;
 
@@ -58,6 +58,7 @@ typedef struct FILE_SEMANTIC
     char* SOURCE_LINE;
     struct INSTRUCTION* INSTR_BASE;
     S32* LINE_CHAR;
+    UINT* CURRENT_BOOL_EXPR;
 
     FILE_MODE MODE;
 
@@ -66,8 +67,8 @@ typedef struct FILE_SEMANTIC
 typedef struct LINE_SEMNATIC
 {
     struct LINE_SEMNATIC* NEXT_LINE;
-    unsigned int HEAD;
-    unsigned int TAIL:1;
+    UINT HEAD;
+    UINT TAIL:1;
     char* SOURCE;
 
 } LINE_SEMNATIC;
@@ -88,6 +89,15 @@ typedef enum SYMBOL_MODE
     SYMBOL_LABEL,
 
 } SYMBOL_MODE;
+
+typedef struct DIRECTIVES
+{
+    char* KEY;
+    UINT(*COMPARE_DIRECTIVES)(const char*, const char*, UNK*);
+    UNK* DIRECTIVE_COUNT;
+
+} DIRECTIVES;
+
 
 void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT, ASSEMBLER* ASSEMBLER);
 void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE);

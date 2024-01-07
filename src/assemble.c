@@ -21,12 +21,16 @@
 STATIC
 DIRECTIVES* COMPARE_TYPES[] = 
 {
+    {"NULL", strncmp}, // BECAUSE C ARRAYS START AT INDEX 0
     {"if", strncmp},
     {"else", strncmp},
     {"elseif", strncmp},
     {"endc", strncmp},
+    {"endr", strncmp},
     {"ifndef", strncmp},
     {"endif", strncmp},
+    {"endm", strncmp},
+    
 };
 
 /* BASED ON THE PROPRIATORY ARGS, ASSEMBLE THE FILE BY */
@@ -213,7 +217,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
         for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
         {
-            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[i]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[i]->KEY, DIRECTIVE_LENGTH) == 0)
+            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[1]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[1]->KEY, DIRECTIVE_LENGTH) == 0)
             {
                 printf("Directive: '%s' found\n", COMPARE_TYPES[i]->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
@@ -225,9 +229,10 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
         for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
         {
-            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[i]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[i]->KEY, DIRECTIVE_LENGTH) == 0)
+            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[4]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[5]->KEY, DIRECTIVE_LENGTH) == 0)
             {
-                printf("Directive: '%s' found\n", COMPARE_TYPES[i]->KEY);
+                printf("Directive: '%s' found\n", COMPARE_TYPES[4]->KEY);
+                printf("Directive: '%s' found\n", COMPARE_TYPES[5]->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
                 break;
             }
@@ -251,9 +256,10 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
          for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
          {
-            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[i]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[i]->KEY, DIRECTIVE_LENGTH) == 0)
+            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[7]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[8]->KEY, DIRECTIVE_LENGTH) == 0)
             {
-                printf("Directive: '%s' found\n", COMPARE_TYPES[i]->KEY);
+                printf("Directive: '%s' found\n", COMPARE_TYPES[7]->KEY);
+                printf("Directive: '%s' found\n", COMPARE_TYPES[8]->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
             }
 

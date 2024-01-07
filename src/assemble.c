@@ -211,22 +211,26 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
         /* THE LENGTH WILL BE EVALUATED AS AN ENUMERATION OF SUCH */
 
-        for (UNK i = 0; i < DIRECTIVES_BASE->DIRECTIVE_COUNT; i++)
+        for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
         {
-            if(DIRECTIVES_BASE[i].COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[i]->KEY, DIRECTIVE_LENGTH) == 0)
+            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[i]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[i]->KEY, DIRECTIVE_LENGTH) == 0)
             {
-                printf("Directive: '%s' found\n", DIRECTIVES_BASE[i].KEY);
+                printf("Directive: '%s' found\n", COMPARE_TYPES[i]->KEY);
+                PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
                 break;
             }
         }
 
-        break;
-
         case MODE_REPEAT: // ASSUMES THAT THERE IS AN ENDR DIRECTIVE - OTHERWISE, CONTINUE TO READ THE LINE
 
-        if(DIRECTIVE_LENGTH != 0 || DIRECTIVES_BASE->COMPARE_DIRECTIVES(LINE_POINTER, "ENDR", DIRECTIVE_LENGTH) == 0)
+        for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
         {
-            PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[i]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[i]->KEY, DIRECTIVE_LENGTH) == 0)
+            {
+                printf("Directive: '%s' found\n", COMPARE_TYPES[i]->KEY);
+                PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+                break;
+            }
         }
 
          break;
@@ -245,11 +249,24 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
          case MODE_MACRO: 
 
-         if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "ENDM", DIRECTIVE_LENGTH) == 0)
+         for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
          {
-            // CHECK TO SEE IF THE MACRO IS AN ENDM DIRECTIVE
-            PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[i]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[i]->KEY, DIRECTIVE_LENGTH) == 0)
+            {
+                printf("Directive: '%s' found\n", COMPARE_TYPES[i]->KEY);
+                PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+            }
+
+            else
+            {
+                if(LABEL != NULL)
+                {
+                    printf(stderr, "Short Macros shouldn't assert labels '%p");
+                }
+            }
          }
+
+         break;
 
     default:
         printf(stderr, "No directives have been parsed\n");

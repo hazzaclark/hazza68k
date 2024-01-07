@@ -219,7 +219,38 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
                 break;
             }
         }
-    
+
+        break;
+
+        case MODE_REPEAT: // ASSUMES THAT THERE IS AN ENDR DIRECTIVE - OTHERWISE, CONTINUE TO READ THE LINE
+
+        if(DIRECTIVE_LENGTH != 0 || DIRECTIVES_BASE->COMPARE_DIRECTIVES(LINE_POINTER, "ENDR", DIRECTIVE_LENGTH) == 0)
+        {
+            PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+        }
+
+         break;
+
+         /* THIS ONE IS SELF-EXPLANATORY */
+         /* IN ASSEMBLY, YOU DECLARE A MACRO BY DOING THE FOLLOWING: */
+         /*================================*/
+         /* MACRO_NAME               MACRO */
+         /*     (your args go here)        */
+         /*                          ENDM */
+         /*================================*/
+         /* SUCH IS THE CASE WITH A MACRO, ANY ARGUMENTS CAN BE PRESENT */
+         /* THE BEST CASE IN ORDER TO COVER ALL BASIS IS TO DO A RUDIMENTARY */
+         /* DIRECTIVE LENGTH CHECK TO DETERMINE HOW MUCH WHITESPACE GOVERNS */
+         /* THE DECLARATIVE SPACE */ 
+
+         case MODE_MACRO: 
+
+         if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "ENDM", DIRECTIVE_LENGTH) == 0)
+         {
+            // CHECK TO SEE IF THE MACRO IS AN ENDM DIRECTIVE
+            PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+         }
+
     default:
         printf(stderr, "No directives have been parsed\n");
         break;

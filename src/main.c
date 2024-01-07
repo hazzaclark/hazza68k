@@ -6,13 +6,29 @@
 
 /* NESTED INCLUDES */
 
+#include "common.h"
 #include "disasm.h"
 
 #ifdef USE_DISASM
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
-    #undef TYPE_ARGS
+    bool PRINT_USAGE;
+
+    /* WE CHECK TO SEE IF THE CODE CONDITION OF THE PROGRAM */
+    /* IS MET BEFORE DISPLAYING CONTENTS */
+
+    /* AFTER WHICH, WE PRINT CONTENTS TO THE SCREEN */
+
+    if(argc < 2 || PRINT_USAGE)
+    {
+        fputs
+        (
+            "-----------------------------------------\n"
+            "Motorola 68000 Assembler - by Harry Clark\n"
+            "-----------------------------------------\n"
+        , stdout);
+    }
 }
 
 #endif

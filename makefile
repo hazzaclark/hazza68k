@@ -1,19 +1,22 @@
-## COPYRIGHT (C) HARRY CLARK 2023
+## COPYRIGHT (C) HARRY CLARK 2024
 
 ## MOTOROLA 68000 ASSEMBLER
-
-PREFIX = /usr/local
+  
 CC = gcc
-SRCS = *.c
-TARGET = $(basename $(firstword $(SRCS)))
+CFLAGS = -std=c90 -Wall -Wextra
+
+SRCS = main.c assemble.c macro.c
+OBJS = $(SRCS:.c=.o)
+
+TARGET = mdemu
 
 all: $(TARGET)
 
-$(TARGET): $(SRCS)
-    $(CC) -o $@ $^
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
 
-install: $(TARGET)
-    cp $(TARGET) $(PREFIX)/bin
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
 
 clean:
-    rm -f $(TARGET)
+	rm -f $(OBJS) $(TARGET)

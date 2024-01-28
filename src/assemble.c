@@ -12,26 +12,6 @@
 #ifdef USE_ASM
 #undef USE_DISASM
 
-/* ASSUME THE RELATIVE STRING CLAUSE FOR THE DIRECITIVE */
-/* AND COMPARE AS AND WHEN APPROPRIATE */
-
-/* THIS FUNCTION CAN BE SEEN BEING USED IN THE ASSEMBLE LINE FUNCTION */
-
-STATIC
-DIRECTIVES* COMPARE_TYPES[] = 
-{
-    {"NULL", strncmp}, /* BECAUSE C ARRAYS START AT INDEX 0 */
-    {"if", strncmp},
-    {"else", strncmp},
-    {"elseif", strncmp},
-    {"endc", strncmp},
-    {"endr", strncmp},
-    {"ifndef", strncmp},
-    {"endif", strncmp},
-    {"endm", strncmp},
-    
-};
-
 /* BASED ON THE PROPRIATORY ARGS, ASSEMBLE THE FILE BY */
 /* DETERMINING THE READ AND WRITE BUFFER IN RELATION TO */
 /* HOW THE LINES ARE BEING READ */
@@ -256,11 +236,11 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
         /* THE LENGTH WILL BE EVALUATED AS AN ENUMERATION OF SUCH */
 
-        for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
+        for (int i = 0; i < sizeof(DIRECTIVES_BASE->COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
         {
-            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[1]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[1]->KEY, DIRECTIVE_LENGTH) == 0)
+            if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "if", DIRECTIVE_LENGTH == 0))
             {
-                printf("Directive: '%s' found\n", COMPARE_TYPES[i]->KEY);
+                printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
                 break;
             }
@@ -268,12 +248,11 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
         case MODE_REPEAT: // ASSUMES THAT THERE IS AN ENDR DIRECTIVE - OTHERWISE, CONTINUE TO READ THE LINE
 
-        for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
+        for (int i = 0; i < sizeof(DIRECTIVES_BASE->COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
         {
-            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[4]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[5]->KEY, DIRECTIVE_LENGTH) == 0)
+            if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "elseif", DIRECTIVE_LENGTH == 0))
             {
-                printf("Directive: '%s' found\n", COMPARE_TYPES[4]->KEY);
-                printf("Directive: '%s' found\n", COMPARE_TYPES[5]->KEY);
+                printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
                 break;
             }
@@ -295,21 +274,23 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
          case MODE_MACRO: 
 
-         for (int i = 0; i < sizeof(COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
+         for (int i = 0; i < sizeof(DIRECTIVES_BASE->COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
          {
-            if(DIRECTIVE_LENGTH != 0 || COMPARE_TYPES[7]->COMPARE_DIRECTIVES(LINE_POINTER, COMPARE_TYPES[8]->KEY, DIRECTIVE_LENGTH) == 0)
+            if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "endif", DIRECTIVE_LENGTH == 0))
             {
-                printf("Directive: '%s' found\n", COMPARE_TYPES[7]->KEY);
-                printf("Directive: '%s' found\n", COMPARE_TYPES[8]->KEY);
+                printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
             }
 
-            else
+            else if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "endm", DIRECTIVE_LENGTH == 0))
             {
-                if(LABEL != NULL)
-                {
-                    printf(stderr, "Short Macros shouldn't assert labels '%p");
-                }
+                printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
+                PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+            }
+
+            if(LABEL != NULL)
+            {
+                printf(stderr, "Short Macros shouldn't assert labels '%p");
             }
          }
 

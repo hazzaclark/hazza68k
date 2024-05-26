@@ -44,7 +44,7 @@ typedef struct DICTIONARY_ENTRY
     UNK IDENTIFIER_LENGTH;
 
     bool HASH_CASES;
-    void(*HASH_TABLE)(void);
+    void(*HASH_TABLE);
 
 } DICTIONARY_ENTRY;
 

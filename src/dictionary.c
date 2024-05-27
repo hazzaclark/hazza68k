@@ -72,6 +72,31 @@ void DICTIONARY_CREATE_DIRECTIVE(struct DICTIONARY_ENTRY* ENTRY, const char* IDE
 
     if(*SEARCH_RESULT == DICT_SEARCH_FOUND)
     {
-        ENTRY->OFFSET = &(ENTRY->PARENT); 
+        if(ENTRY->OFFSET != NULL)
+            ENTRY->OFFSET = &(ENTRY->PARENT); 
+    }
+
+    /* OTHERWISE, CREATE THE MISSING NODES REQUIRED FOR THE SYMBOL */
+
+    else
+    {
+        DICTIONARY_ENTRY* NEW_ENTRY = (DICTIONARY_ENTRY*)malloc(sizeof(ENTRY) - 1 + IDENTIFIER_LENGTH); 
+
+        if(NEW_ENTRY == NULL)
+            ENTRY->ENTRY_SUCCESS = false;
+
+        else
+            NEW_ENTRY->PARENT = NULL;
+            NEW_ENTRY->LEFT = NULL;
+            NEW_ENTRY->RIGHT = NULL;
+
+            NEW_ENTRY->NEXT = NULL;
+            NEW_ENTRY->PREVIOUS = NULL;
+            NEW_ENTRY->TYPE =  -1;
+
+            NEW_ENTRY->IDENTIFIER_LENGTH = IDENTIFIER_LENGTH;
+
+            if(ENTRY->OFFSET != NULL)
+                ENTRY->OFFSET = &NEW_ENTRY->PARENT;
     }
 }

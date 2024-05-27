@@ -8,6 +8,7 @@
 /* NESTED INCLUDES */
 
 #include "assemble.h"
+#include "dictionary.h"
 
 #ifdef USE_ASM
 #undef USE_DISASM
@@ -252,6 +253,27 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
                 FILE_STATE->CURRENT_IF++;
             }
+
+            else if(strncmp(LINE_POINTER, "elseif", DIRECTIVE_LENGTH) == 0
+                || strncmp(LINE_POINTER,  "else",   DIRECTIVE_LENGTH) == 0
+                || strncmp(LINE_POINTER,  "endc",   DIRECTIVE_LENGTH) == 0
+                || strncmp(LINE_POINTER,  "endif",  DIRECTIVE_LENGTH) == 0)
+
+                {
+                    PARSE_LINE(FILE_STATE, FILE_STATE->SOURCE_LINE, LABEL, LINE_POINTER);
+                }
+        }
+
+        else
+        {
+            #ifdef USE_DICTIONARY
+
+            struct DICTIONARY_ENTRY* ENTRY = DICTIONARY_LOOKUP(FILE_STATE, LINE_POINTER, DIRECTIVE_LENGTH);
+
+            if(ENTRY == NULL || ENTRY->TYPE != SYMBOL_MACRO)
+                PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+
+            #endif
         }
 
         case MODE_REPEAT: /* ASSUMES THAT THERE IS AN ENDR DIRECTIVE - OTHERWISE, CONTINUE TO READ THE LINE */

@@ -281,6 +281,13 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
             else
                 LINE_POINTER += strspn(LINE_POINTER, DIRECTIVE_CHARS);
                 DIRECTIVE_PARAMS = (char**)fprintf(FILE_STATE, "Invalid parameters pertaining to Directive: %08x");
+                DIRECTIVE_TOTAL_PARAMS = 1;
+
+                /* ASSUMING THAT THERE IS NO NULL TERMINATING CHARACTER */
+                /* THAT PREVENTS THE OFFSET FROM PARSING THE LINE ANY FURTHER */
+
+                if(LINE_POINTER[0] == '.')
+                    STORE_MACRO_SIZE_SPEC();
 
             #endif
         }
@@ -366,6 +373,26 @@ void ADD_DIRECTIVE_DEFINITION(void* STATE, char IDENTIFIER)
         PRINT_SEMANTIC(FILE_STATE, "Directive %lu cannot be found for this line", &STATE);
         break;
     }
+}
+
+/* WHAT IT SAYS ON THE TIN, STORE THE RELEVANT MACRO SIZE SPECIFIER */
+/* IN RELATION TO AN ARBITRARY SIZE AND LENGTH, ASSUMING THAT THERE IS NO */
+/* NULL TERMINATING CHARACTER */
+
+void STORE_MACRO_SIZE_SPEC(void)
+{
+    size_t* SIZE_LENGTH;
+    char* LINE_POINTER;
+
+    /* SKIP THE NULL TERM CHAR, IF ONE EXISTS */
+
+    LINE_POINTER++;
+
+    SIZE_LENGTH = strspn(LINE_POINTER, DIRECTIVE_CHARS);
+
+    /* RETURN AND STORE THE SIZE */
+
+    LINE_POINTER += *SIZE_LENGTH;    
 }
 
 /* THE PIECE DE RESISTANCE - THE PENULTIMATE ASSEMBLING FUNCTION */

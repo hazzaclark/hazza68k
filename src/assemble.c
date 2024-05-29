@@ -270,8 +270,17 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
             struct DICTIONARY_ENTRY* ENTRY = DICTIONARY_LOOKUP(FILE_STATE, LINE_POINTER, DIRECTIVE_LENGTH);
 
+            /* IF THERE IS NO RELEVANT ENTRY IN RELATION TO THE SYMBOL TYPE */
+            /* CREATE A NEW ENTRY AND PARSE THOSE CONTENTS */
+
+            /* OTHERWISE, CASTING A WARNING PERTAINING TOWARDS THE OFFSET */
+            /* AS IT WILL ASSUME THAT THERE IS NOTHING THERE */
+
             if(ENTRY == NULL || ENTRY->TYPE != SYMBOL_MACRO)
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+            else
+                LINE_POINTER += strspn(LINE_POINTER, DIRECTIVE_CHARS);
+                DIRECTIVE_PARAMS = (char**)fprintf(FILE_STATE, "Invalid parameters pertaining to Directive: %08x");
 
             #endif
         }

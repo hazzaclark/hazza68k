@@ -435,6 +435,11 @@ void STORE_MACRO_PARAMS(void)
                         break;
                 }
             }
+
+            if(MACRO->IDENTIFIER = '\0')
+                break;
+
+            MACRO->MACRO_PARAM_START = MACRO->LINE_POINTER;
         }
     }
 }

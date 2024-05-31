@@ -29,11 +29,15 @@ static INSTRUCTION* TYPE ## VALUE(int, char*, char*, int*)
 
 #define         DIRECTIVE_CHARS         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789?_"
 #define         LABEL_CHARS             DIRECTIVE_CHARS ".@"
-
+#define         DIRECTIVE_MAX                   5
+#define         DIRECTIVE_LENGTH_MAX            10
 
 #define         PARAM_FALSE_IF                0
 #define         PARAM_TOTAL                   1
 #define         PARAM_SUFFIX                  ''
+
+#define PRINT_SEMANTIC(STATE, COMMENT, ADDRESS) fprintf(stderr,"%lu:\n", STATE, COMMENT, ADDRESS)
+#define PRINT_INTERNAL(STATE) fputs(stderr, " ", STATE)
 
 typedef struct ASSEMBLER
 {
@@ -43,8 +47,11 @@ typedef struct ASSEMBLER
     FILE* OUTPUT_FILE;
     FILE* LISTING_FILE;
     FILE* SYMBOL_FILE;
+    FILE* ERROR_FILE;
     U32** LISTING_COUNT;
+    char* FILE_PATH;
     char IDENTIFIER;
+    ULONG(*LINE_NUMBER);
 
 } ASSEMBLER;
 
@@ -54,13 +61,24 @@ typedef struct FILE_SEMANTIC
     char* MNEMONIC;
     char* INSTRUCTION_COUNT;
     char* WRITE_BUFFER;
-    char* LINE_BUFFER[0];
+    char LINE_BUFFER[1024];
     char* SOURCE_LINE;
     struct INSTRUCTION* INSTR_BASE;
-    S32* LINE_CHAR;
+    char LINE_CHAR;
     UINT* CURRENT_BOOL_EXPR;
+    int FILE_MODE;
 
-    FILE_MODE MODE;
+    UINT CURRENT_IF;
+    UINT FALSE_IF;
+    const char* AFTER_IF;
+
+    union FILE_SYMBOL
+    {
+        char SYMBOL;
+        unsigned TYPE;
+        ULONG* SHARED_VALUE;
+
+    } FILE_SYMBOL;
 
 } FILE_SEMANTIC;
 
@@ -93,13 +111,15 @@ typedef enum SYMBOL_MODE
 typedef struct DIRECTIVES
 {
     char* KEY;
-    UINT(*COMPARE_DIRECTIVES)(const char*, const char*, UNK*);
+    int(*COMPARE_TYPES);
     UNK* DIRECTIVE_COUNT;
 
 } DIRECTIVES;
 
 typedef struct NODE_ENTRY
 {
+    char* SOURCE_LINE;
+    unsigned VALUE;
     unsigned TYPE;
     void* POINTER;
 
@@ -110,6 +130,18 @@ typedef struct NODE_ENTRY
 
 } NODE_ENTRY;
 
+typedef struct MACROS
+{
+    char* LINE_POINTER;
+    char* MACRO_CHAR;
+    char* MACRO_PARAM_START;
+    char** MACRO_TOTAL_PARAMS;
+    char* IDENTIFIER;
+
+    UINT* PARAM_COUNT;
+
+
+} MACROS;
 
 void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT, ASSEMBLER* ASSEMBLER);
 void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE);
@@ -119,6 +151,10 @@ void MACRO_TERMINATE(FILE_SEMANTIC* SEMANTIC);
 void MACRO_TERMINATE_WHILE(FILE_SEMANTIC* SEMANTIC);
 unsigned MACRO_BIT_SIZE(unsigned BIT_SIZE);
 void OUT_OF_MEMORY(void);
+
+extern const char* DIRECTIVE_TYPES[DIRECTIVE_MAX] = {"if", "elseif", "else", "endc", "endif"};
+extern char** DIRECTIVE_PARAMS;
+extern UINT* DIRECTIVE_TOTAL_PARAMS;
 
 #endif
 #endif

@@ -291,20 +291,19 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
                 else
                     DIRECTIVE_PARAMS[0] = NULL;
 
+                STORE_MACRO_PARAMS();
+
             #endif
         }
 
         case MODE_REPEAT: /* ASSUMES THAT THERE IS AN ENDR DIRECTIVE - OTHERWISE, CONTINUE TO READ THE LINE */
 
-        for (int i = 0; i < sizeof(DIRECTIVES_BASE->COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
-        {
-            if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "elseif", DIRECTIVE_LENGTH == 0))
+            if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "endr", DIRECTIVE_LENGTH == 0))
             {
                 printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
                 break;
             }
-        }
 
          break;
 
@@ -322,15 +321,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
          case MODE_MACRO: 
 
-         for (int i = 0; i < sizeof(DIRECTIVES_BASE->COMPARE_TYPES) / sizeof(DIRECTIVES); i++)
-         {
-            if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "endif", DIRECTIVE_LENGTH == 0))
-            {
-                printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
-                PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
-            }
-
-            else if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "endm", DIRECTIVE_LENGTH == 0))
+            if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "endm", DIRECTIVE_LENGTH == 0))
             {
                 printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
@@ -340,7 +331,6 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
             {
                 printf(stderr, "Short Macros shouldn't assert labels '%p");
             }
-         }
 
          break;
 
@@ -407,7 +397,7 @@ void STORE_MACRO_PARAMS(void)
 
     while(*MACRO->LINE_POINTER != '\0')
     {
-        MACRO->IDENTIFIER = (char*)(*MACRO->LINE_POINTER);
+        MACRO->IDENTIFIER = (char)(*MACRO->LINE_POINTER);
 
         /* HANDLE NESTED PARENTHESES THAT CAN BE FOUND IN MACRO DECLARATIVES */
         /* BY SKIPPING THE EOL CHARACTER */
@@ -421,7 +411,7 @@ void STORE_MACRO_PARAMS(void)
 
             while(PARAM_DEPTH > 0 && *MACRO->LINE_POINTER != '\0')
             {
-                MACRO->IDENTIFIER = (char*)(*MACRO->LINE_POINTER);
+                MACRO->IDENTIFIER = (char)(*MACRO->LINE_POINTER);
 
                 /* COUROUTINE TO DETERMINE WHICH NESTED CHAR IS PRESENT */
 

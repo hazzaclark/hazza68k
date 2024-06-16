@@ -5,7 +5,7 @@
 CC = gcc
 CFLAGS = -std=c90 -Wall -Wextra -Wparentheses -Werror 
 
-SRCS = main.c assemble.c macro.c
+SRCS = main.c assemble.c dictionary.c macro.c
 OBJS = $(SRCS:.c=.o)
 
 TARGET = mdemu

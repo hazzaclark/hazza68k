@@ -9,6 +9,7 @@
 #ifndef COMMON
 #define COMMON
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -21,7 +22,9 @@ typedef uint32_t U32;
 typedef uint64_t U64;
 typedef size_t UNK;
 
+typedef unsigned int UINT;
 typedef unsigned long ULONG;
+typedef unsigned short USHORT;
 
 #endif 
 
@@ -43,6 +46,15 @@ typedef double F64;
 typedef volatile float VF32;
 typedef volatile double VF64;
 
+#endif
+
+#define     STATIC      static
+#define     INLINE      inline
+
+#ifndef ASM_UNUSED
+#define ASM_UNUSED __attribute__((unused))
+#else
+#define ASM_UNUSED
 #endif
 
 #endif

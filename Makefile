@@ -1,9 +1,9 @@
-## COPYRIGHT (C) HARRY CLARK 2024
+## COPYRIGHT (C) HARRY CLARK 2023
 
 ## MOTOROLA 68000 ASSEMBLER
   
 CC = gcc
-CFLAGS = -std=c90 -Wall -Wextra
+CFLAGS = -std=c90 -Wall -Wextra -Wparentheses -Werror 
 
 SRCS = main.c assemble.c macro.c
 OBJS = $(SRCS:.c=.o)

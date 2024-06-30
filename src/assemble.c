@@ -196,7 +196,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
     else
     {
-        LABEL = memcpy(FILE_STATE, LINE_POINTER, LABEL_LENGTH);
+        LABEL = memcpy(FILE_STATE, LINE_POINTER, *LABEL_LENGTH);
         LINE_POINTER += sizeof(LABEL_LENGTH);
 
         /* SKIP THE WHITESPACE AT THE END OF THE LINE */
@@ -234,18 +234,21 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
         if(FILE_STATE->FALSE_IF != 0 || DIRECTIVE_LENGTH != 0)
         {
-            if(strncmp(LINE_POINTER, "if", DIRECTIVE_LENGTH) == 0)
+            if(strncmp(LINE_POINTER, "if", *DIRECTIVE_LENGTH) == 0)
             {
                 /* CHECK THE SEE IF THERE IS ANY CONCURRENT CODE AFTER THE IF STATEMENT */
                 /* ALSO CHECK FOR SUBSEQUENT WHITESPACE */
 
                 FILE_STATE->AFTER_IF = LINE_POINTER + (*DIRECTIVE_LENGTH);
 
-                while(FILE_STATE->AFTER_IF == ' ' || FILE_STATE->AFTER_IF == '\t') FILE_STATE->AFTER_IF++;
 
-                if(FILE_STATE->AFTER_IF != '\0')
+                while(*FILE_STATE->AFTER_IF == ' ' || *FILE_STATE->AFTER_IF == '\t') FILE_STATE->AFTER_IF++;
+
+                if((FILE_STATE->AFTER_IF) != '\0')
+                {
                     fprintf(stderr, "Unexpected If Level after execution\n");
                     exit(EXIT_FAILURE);
+                }
 
                 /* THIS IS UNDER THE GUISE OF ASSUMINNG THAT IF STATEMENTS ASDRE NESTED */
                 /* WITHIN AN INVALID IF STATEMENT. THIS WILL ITERATE THROUGH EACH RESPECTIVE IF LEVEL TO DETERMINE */
@@ -254,10 +257,10 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
                 FILE_STATE->CURRENT_IF++;
             }
 
-            else if(strncmp(LINE_POINTER, "elseif", DIRECTIVE_LENGTH) == 0
-                || strncmp(LINE_POINTER,  "else",   DIRECTIVE_LENGTH) == 0
-                || strncmp(LINE_POINTER,  "endc",   DIRECTIVE_LENGTH) == 0
-                || strncmp(LINE_POINTER,  "endif",  DIRECTIVE_LENGTH) == 0)
+            else if(strncmp(LINE_POINTER, "elseif", *DIRECTIVE_LENGTH) == 0
+                || strncmp(LINE_POINTER,  "else",   *DIRECTIVE_LENGTH) == 0
+                || strncmp(LINE_POINTER,  "endc",   *DIRECTIVE_LENGTH) == 0
+                || strncmp(LINE_POINTER,  "endif",  *DIRECTIVE_LENGTH) == 0)
 
                 {
                     PARSE_LINE(FILE_STATE, FILE_STATE->SOURCE_LINE, LABEL, LINE_POINTER);

@@ -68,6 +68,8 @@ typedef struct FILE_SEMANTIC
     UINT* CURRENT_BOOL_EXPR;
     int FILE_MODE;
 
+    UNK* OFFSET_POS;
+
     UINT CURRENT_IF;
     UINT FALSE_IF;
     const char* AFTER_IF;
@@ -152,8 +154,8 @@ void MACRO_TERMINATE_WHILE(FILE_SEMANTIC* SEMANTIC);
 unsigned MACRO_BIT_SIZE(unsigned BIT_SIZE);
 void OUT_OF_MEMORY(void);
 
-extern const char* DIRECTIVE_TYPES[DIRECTIVE_MAX] = {"if", "elseif", "else", "endc", "endif"};
-extern char** DIRECTIVE_PARAMS;
+static char* DIRECTIVE_TYPES[DIRECTIVE_MAX] = {"if", "elseif", "else", "endc", "endif"};
+static char** DIRECTIVE_PARAMS;
 extern UINT* DIRECTIVE_TOTAL_PARAMS;
 
 #endif

@@ -93,7 +93,7 @@ void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT, struct ASSEMBLER* ASS
             continue;
         }
 
-        FILE_STATE->LINE_BUFFER[NEWLINE_CHAR] = '\0';
+        FILE_STATE->LINE_BUFFER[(int)NEWLINE_CHAR] = '\0';
 
         /* OUTPUT THE CORRESPONDING MEMORY ADDRESS */
         /* FROM THE PROGRAM COUNTER INTO THE LISTING FILE */
@@ -104,7 +104,7 @@ void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT, struct ASSEMBLER* ASS
         if (ASSEMBLER->LISTING_FILE != NULL)
         {
             ASSEMBLER->LISTING_COUNT = 0;
-            fprintf(stdin, &ASSEMBLER->LISTING_FILE, "%0x0", &ASSEMBLER->PC);
+            fprintf(stdin, (char*)ASSEMBLER->LISTING_FILE, "%0x0", &ASSEMBLER->PC);
         }
 
         ASSEMBLE_LINE(FILE_STATE, FILE_STATE->LINE_BUFFER);
@@ -121,10 +121,10 @@ void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT, struct ASSEMBLER* ASS
 
             for (INDEX += sizeof(ASSEMBLER->LISTING_COUNT) * 2 + sizeof(ASSEMBLER->LISTING_COUNT) / 2; INDEX < 31; ++INDEX)
             {
-                fputc(' ', sizeof(ASSEMBLER->LISTING_FILE));
+                fputc(' ', ASSEMBLER->LISTING_FILE);
             }
 
-            fprintf(sizeof(ASSEMBLER->LISTING_FILE), "%s\n", sizeof(FILE_STATE->LINE_BUFFER));
+            fprintf(ASSEMBLER->LISTING_FILE, "%s\n", FILE_STATE->LINE_BUFFER);
             
         }
     }
@@ -164,12 +164,12 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
     char* LINE_POINTER;
     int FILE_MODE;
 
-    /* THIS EVOKES THAT IF THE SOURCE OF THE LINE IS INDEXXED AS ANY DIRIVATIVE */
-    /* RETURN THE CORRESPODENCE */
+    /* THIS EVOKES THAT IF THE SOURCE OF THE LINE IS INDEXXED AS ANY DERIVATIVE */
+    /* RETURN THE CORRESPONDENCE */
 
     if(SOURCE[0] == '*')
     {
-        return sizeof(SOURCE);
+        memset((void*)SOURCE, 0, 0);
     }
 
     /* ATTRIBUTE THE SOURCE OF THE LINE WITH THE RELATIVE SIZE OF SUCH AN INSTANCE */
@@ -178,12 +178,12 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
     /* FROM THERE, THE ASSEMBLER WILL EVALUATE EACH RESPECTIVE ELEMENT OF THE LINE */
     /* BY DETERMINING THE LENGTH OF THE LINE BASED ON THE AMOUNT OF CHARS */
 
-    FILE_STATE->SOURCE_LINE += assert(SOURCE);
-    LINE_POINTER += assert(SOURCE, LABEL);
+    FILE_STATE->SOURCE_LINE += *SOURCE;
+    LINE_POINTER += *SOURCE || LABEL;
 
     if(LABEL_LENGTH != 0)
     {
-        LABEL_LENGTH = strcspn(LINE_POINTER, LABEL_CHARS);
+        LABEL_LENGTH += strcspn(LINE_POINTER, LABEL_CHARS);
 
         /* SKIP THE WHITESPACE IN-BETWEEN LINES BY TRANSPOSING THEIR POSITION */
 
@@ -191,7 +191,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
         /* EVALUATE THE LENGTH OF THE LABEL AMIDST THE TRANSPOSITION */
 
-        LABEL_LENGTH = strcspn(LINE_POINTER, LABEL_CHARS);
+        LABEL_LENGTH += strcspn(LINE_POINTER, LABEL_CHARS);
     }
 
     else
@@ -329,13 +329,13 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
             if(LABEL != NULL)
             {
-                printf(stderr, "Short Macros shouldn't assert labels '%p");
+                fprintf(stderr, "Short Macros shouldn't assert labels '%p");
             }
 
          break;
 
     default:
-        printf(stderr, "No directives have been parsed\n");
+        ffprintf(stderr, "No directives have been parsed\n");
         break;
     }
 
@@ -431,6 +431,27 @@ void STORE_MACRO_PARAMS(void)
 
             MACRO->MACRO_PARAM_START = MACRO->LINE_POINTER;
         }
+    }
+}
+
+/* PARSE THE LINE BASED ON RELEVANT LOCATION OF THE SOURCE LINE */
+/* AS WELL AS BASED ON WHICH INSTRUCTION IS CURRENTLY BEING EXECUTED IN THE PC */
+
+void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTER)
+{
+    int RESULT;
+    struct ASSEMBLER* ASM;
+
+    ULONG* PC_START_OFFSET = ASM->PC;
+    UNK PC_START_OFFSET_POS = FILE_STATE->OFFSET_POS;
+
+    /* PARSE THE SOURCE LINE BASED ON THE CURRENT STRING */
+
+    switch(RESULT)
+    {
+        case 0:
+            FILE_STATE->END_OF_FILE = false;
+            
     }
 }
 

@@ -435,7 +435,8 @@ void STORE_MACRO_PARAMS(void)
 void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTER)
 {
     int RESULT;
-    struct ASSEMBLER* ASM;
+    struct ASSEMBLER* ASM = malloc(sizeof(ASSEMBLER));
+    struct LOCATION* LOCATION = malloc(sizeof(LOCATION));
 
     ULONG* PC_START_OFFSET = ASM->PC;
     UNK* PC_START_OFFSET_POS = (UNK*)FILE_STATE->OFFSET_POS;
@@ -447,6 +448,19 @@ void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTE
         case 0:
             FILE_STATE->END_OF_FILE = false;
             
+            if(!FILE_STATE)
+            {
+                free(FILE_STATE);
+            }
+
+            else 
+            {
+                LOCATION += *(UNK*)FILE_STATE->OFFSET_POS;
+                LOCATION += *(UNK*)PC_START_OFFSET;
+                LOCATION += *(ULONG*)PC_START_OFFSET_POS;
+                LOCATION = (void*)LABEL ? NULL : (void*)&LINE;
+
+            }
     }
 }
 

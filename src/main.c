@@ -13,16 +13,9 @@
 
 int main(int argc, char** argv)
 {
-    bool PRINT_USAGE;
-    char* INPUT_FILE_PATH;
-    char* OUTPUT_FILE_PATH;
-    char* LISTING_FILE_PATH;
-    char* SYMBOL_FILE_PATH;
-
-    bool CASE_INSENSITIVE;
-    bool ADDRESS_ADD;
-    bool WARNINGS;
-
+    bool PRINT_USAGE = false;
+    char* INPUT_FILE_PATH = NULL;
+    char* OUTPUT_FILE_PATH = NULL;
     int INDEX;
 
     /* WE CHECK TO SEE IF THE CODE CONDITION OF THE PROGRAM */
@@ -32,15 +25,43 @@ int main(int argc, char** argv)
 
     for(INDEX = 1; INDEX < argc; INDEX++)
     {
-        if(argv[INDEX][1] = '-')
+        if(argv[INDEX][0] == '-') 
         {
             switch (argv[INDEX][1])
             {
                 case 'i':
-                    INPUT_FILE_PATH = argv[INDEX];
-                    INDEX++;
+                    if (INDEX + 1 < argc) 
+                    {
+                        INPUT_FILE_PATH = argv[INDEX + 1];
+                        INDEX++;
+                    } 
+                    else 
+                    {
+                        fprintf(stderr, "No input file path specified after '-i'.\n");
+                        return EXIT_FAILURE;
+                    }
+
+                    continue;
+                case 'o':
+                    if (INDEX + 1 < argc) 
+                    {
+                        OUTPUT_FILE_PATH = argv[INDEX + 1];
+                        INDEX++;
+                    } 
+                    else 
+                    {
+                        fprintf(stderr, "No output file path specified after '-o'.\n");
+                        return EXIT_FAILURE;
+                    }
                     continue;
 
+                case 'u':
+                    PRINT_USAGE = true;
+                    continue;
+
+                default:
+                    fprintf(stderr, "Unknown option '-%c'.\n", argv[INDEX][1]);
+                    return EXIT_FAILURE;
             }
         }
     }
@@ -59,12 +80,17 @@ int main(int argc, char** argv)
             "-----------------------------------------\n"
         , stdout);
     }
-
     else
     {
+        if(INPUT_FILE_PATH == NULL)
+        {
+            fprintf(stderr, "Input File path must be specified with '-i.\n");
+            return EXIT_FAILURE;
+        }
+
         if(OUTPUT_FILE_PATH == NULL)
         {
-            fprintf(stderr, "Output File path must be specified with '-o'.");
+            fprintf(stderr, "Output File path must be specified with '-o'.\n");
             return EXIT_FAILURE;
         }
     }

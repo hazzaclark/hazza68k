@@ -10,7 +10,6 @@
 #include "assemble.h"
 #include "dictionary.h"
 
-#ifdef USE_ASM
 #undef USE_DISASM
 
 /* BASED ON THE PROPRIATORY ARGS, ASSEMBLE THE FILE BY */
@@ -271,7 +270,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
         {
             #ifdef USE_DICTIONARY
 
-            struct DICTIONARY_ENTRY* ENTRY = DICTIONARY_LOOKUP(FILE_STATE, LINE_POINTER, DIRECTIVE_LENGTH);
+            struct DICTIONARY_ENTRY* ENTRY = DICTIONARY_LOOKUP(FILE_STATE, LINE_POINTER, *DIRECTIVE_LENGTH);
 
             /* IF THERE IS NO RELEVANT ENTRY IN RELATION TO THE SYMBOL TYPE */
             /* CREATE A NEW ENTRY AND PARSE THOSE CONTENTS */
@@ -280,23 +279,16 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
             /* AS IT WILL ASSUME THAT THERE IS NOTHING THERE */
 
             if(ENTRY == NULL || ENTRY->TYPE != SYMBOL_MACRO)
+            {
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
+            }
             else
+            {
                 LINE_POINTER += strspn(LINE_POINTER, DIRECTIVE_CHARS);
-                DIRECTIVE_PARAMS = (char**)fprintf(FILE_STATE, "Invalid parameters pertaining to Directive: %08x");
-                DIRECTIVE_TOTAL_PARAMS = 1;
-
-                /* ASSUMING THAT THERE IS NO NULL TERMINATING CHARACTER */
-                /* THAT PREVENTS THE OFFSET FROM PARSING THE LINE ANY FURTHER */
-
-                if(LINE_POINTER[0] == '.')
-                    STORE_MACRO_SIZE_SPEC();
-                else
-                    DIRECTIVE_PARAMS[0] = NULL;
-
-                STORE_MACRO_PARAMS();
-
-            #endif
+                DIRECTIVE_PARAMS = (char**)fprintf((FILE*)FILE_STATE, "Invalid parameters pertaining to Directive: %08x");
+                
+                DIRECTIVE_TOTAL_PARAMS += 1;
+            }
         }
 
         case MODE_REPEAT: /* ASSUMES THAT THERE IS AN ENDR DIRECTIVE - OTHERWISE, CONTINUE TO READ THE LINE */
@@ -322,8 +314,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
          /* DIRECTIVE LENGTH CHECK TO DETERMINE HOW MUCH WHITESPACE GOVERNS */
          /* THE DECLARATIVE SPACE */ 
 
-         case MODE_MACRO: 
-
+        case MODE_MACRO: 
             if(DIRECTIVE_LENGTH != 0 || strncmp(LINE_POINTER, "endm", DIRECTIVE_LENGTH == 0))
             {
                 printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
@@ -338,7 +329,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
          break;
 
     default:
-        ffprintf(stderr, "No directives have been parsed\n");
+        fprintf(stderr, "No directives have been parsed\n");
         break;
     }
 
@@ -354,14 +345,14 @@ void ADD_DIRECTIVE_DEFINITION(void* STATE, char IDENTIFIER)
 
     switch (IDENTIFIER)
     {
-    case 'CONSTANT':
+    case 0:
         FILE_STATE.FILE_SYMBOL.TYPE = SYMBOL_CONST;
-        FILE_STATE.FILE_SYMBOL.SHARED_VALUE = IDENTIFIER;
+        FILE_STATE.FILE_SYMBOL.SHARED_VALUE += sizeof(IDENTIFIER);
         break;
 
-    case 'VARIABLE':
+    case 1:
         FILE_STATE.FILE_SYMBOL.TYPE = SYMBOL_VAR;
-        FILE_STATE.FILE_SYMBOL.SHARED_VALUE = IDENTIFIER;
+        FILE_STATE.FILE_SYMBOL.SHARED_VALUE += sizeof(IDENTIFIER);
         break;
     
     default:
@@ -376,7 +367,7 @@ void ADD_DIRECTIVE_DEFINITION(void* STATE, char IDENTIFIER)
 
 void STORE_MACRO_SIZE_SPEC(void)
 {
-    size_t* SIZE_LENGTH;
+    size_t SIZE_LENGTH;
     char* LINE_POINTER;
 
     /* SKIP THE NULL TERM CHAR, IF ONE EXISTS */
@@ -387,7 +378,7 @@ void STORE_MACRO_SIZE_SPEC(void)
 
     /* RETURN AND STORE THE SIZE */
 
-    LINE_POINTER += *SIZE_LENGTH;    
+    LINE_POINTER += SIZE_LENGTH;    
 }
 
 void STORE_MACRO_PARAMS(void)

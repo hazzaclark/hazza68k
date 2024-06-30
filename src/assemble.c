@@ -384,28 +384,27 @@ void STORE_MACRO_SIZE_SPEC(void)
 void STORE_MACRO_PARAMS(void)
 {
     struct MACROS* MACRO = malloc(sizeof(MACROS));
-    const char* MACRO_PARAM = MACRO->LINE_POINTER += strspn(MACRO->LINE_POINTER, "\t");
 
     /* IDENTIFY THE EOL FOR THE MACRO OFFSET */
     /* THIS IS DONE BY CASTING THE OFFSET TOWARDS WHERE THE MACRO IS */
 
     while(*MACRO->LINE_POINTER != '\0')
     {
-        MACRO->IDENTIFIER = (char)(*MACRO->LINE_POINTER);
+        MACRO->IDENTIFIER = (char*)(MACRO->LINE_POINTER);
 
         /* HANDLE NESTED PARENTHESES THAT CAN BE FOUND IN MACRO DECLARATIVES */
         /* BY SKIPPING THE EOL CHARACTER */
 
-        if(MACRO->IDENTIFIER == '(')
+        if((*MACRO->IDENTIFIER) == '(')
         {
-            UINT* PARAM_DEPTH = 1;
+            UINT PARAM_DEPTH = 1;
 
             /* IDENTIFY THE DEPTH BY WHICH THE LINE IS PARSED AND READ */
             /* THIS WILL HELP IN DETERMINING THE EOL AS WELL AS OTHER ABSTRACTIONS */
 
             while(PARAM_DEPTH > 0 && *MACRO->LINE_POINTER != '\0')
             {
-                MACRO->IDENTIFIER = (char)(*MACRO->LINE_POINTER);
+                MACRO->IDENTIFIER = (char*)(MACRO->LINE_POINTER);
 
                 /* COUROUTINE TO DETERMINE WHICH NESTED CHAR IS PRESENT */
 
@@ -420,8 +419,10 @@ void STORE_MACRO_PARAMS(void)
                 }
             }
 
-            if(MACRO->IDENTIFIER = '\0')
+            if((*MACRO->IDENTIFIER) == '\0')
+            {
                 break;
+            }
 
             MACRO->MACRO_PARAM_START = MACRO->LINE_POINTER;
         }
@@ -437,7 +438,7 @@ void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTE
     struct ASSEMBLER* ASM;
 
     ULONG* PC_START_OFFSET = ASM->PC;
-    UNK PC_START_OFFSET_POS = FILE_STATE->OFFSET_POS;
+    UNK* PC_START_OFFSET_POS = (UNK*)FILE_STATE->OFFSET_POS;
 
     /* PARSE THE SOURCE LINE BASED ON THE CURRENT STRING */
 

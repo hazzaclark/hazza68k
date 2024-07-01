@@ -3,12 +3,12 @@
 ## MOTOROLA 68000 ASSEMBLER
   
 CC = gcc
-CFLAGS = -std=c90 -Wall -Wextra -Wparentheses -Werror 
+CFLAGS = -std=c99 -Wall -Wextra -Wparentheses -Werror -pedantic
 
 SRCS = main.c assemble.c dictionary.c macro.c
 OBJS = $(SRCS:.c=.o)
 
-TARGET = mdemu
+TARGET = hazza68k
 
 all: $(TARGET)
 

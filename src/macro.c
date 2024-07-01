@@ -55,7 +55,7 @@ void MACRO_TERMINATE(FILE_SEMANTIC* SEMANTIC)
         if(EXP != NULL)
         {
             EXP->SUB_EXP.EXP_NAME = SEMANTIC->MNEMONIC;
-            EXP->NODE.HEAD = SEMANTIC->SOURCE_LINE;
+            EXP->NODE.HEAD += *(char*)SEMANTIC->SOURCE_LINE;
             SYMBOL = SYMBOL_MACRO;
         }
     }

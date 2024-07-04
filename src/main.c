@@ -11,12 +11,34 @@
 
 #ifdef USE_DISASM
 
+static FILE* INPUT_FILE;
+static FILE* OUTPUT_FILE;
+static FILE* SYMBOL_FILE; 
+static FILE* LISTING_FILE;
+
+static char* INPUT_FILE_PATH;
+static char* OUTPUT_FILE_PATH;
+
+/* THIS FUNCTION SERVES TO PROVIDE A SURROGATE MEANS OF DECLUTTERING */
+/* THE MAIN FUNCTION WITH VERBOSE STATEMENTS */
+
+void CHECK_VALID_ARGS(void)
+{
+    if(OUTPUT_FILE_PATH == NULL)
+    {
+        fprintf(stderr, "Output file path must be specified using '-o");
+    }
+
+    else
+    {
+        INPUT_FILE = (INPUT_FILE_PATH == NULL) ? stdin : fopen(INPUT_FILE_PATH, "r");
+    }
+}
+
 int main(int argc, char** argv)
 {
     bool PRINT_USAGE = false;
-    char* INPUT_FILE_PATH = NULL;
-    char* OUTPUT_FILE_PATH = NULL;
-    int INDEX;
+    int INDEX;         
 
     /* WE CHECK TO SEE IF THE CODE CONDITION OF THE PROGRAM */
     /* IS MET BEFORE DISPLAYING CONTENTS */
@@ -82,17 +104,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        if(INPUT_FILE_PATH == NULL)
-        {
-            fprintf(stderr, "Input File path must be specified with '-i.\n");
-            return EXIT_FAILURE;
-        }
-
-        if(OUTPUT_FILE_PATH == NULL)
-        {
-            fprintf(stderr, "Output File path must be specified with '-o'.\n");
-            return EXIT_FAILURE;
-        }
+       CHECK_VALID_ARGS();
     }
 
     return 0;

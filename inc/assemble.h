@@ -97,7 +97,7 @@ typedef enum FILE_MODE
 {
     MODE_NORMAL,
     MODE_REPEAT,
-    MODE_MACRO,
+    MODE_MACRO
     
 } FILE_MODE;
 
@@ -106,7 +106,7 @@ typedef enum SYMBOL_MODE
     SYMBOL_CONST,
     SYMBOL_VAR,
     SYMBOL_MACRO,
-    SYMBOL_LABEL,
+    SYMBOL_LABEL
 
 } SYMBOL_MODE;
 
@@ -145,7 +145,23 @@ typedef struct MACROS
 
 } MACROS;
 
-void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT, ASSEMBLER* ASSEMBLER);
+typedef struct LOCATION
+{
+    void(*PREV);
+    char* FILE_PATH;
+    ULONG LINE_POS;
+
+} LOCATION;
+
+typedef struct TEXT
+{
+    void(*USER_DATA);
+    void(*READ_CHAR)(void* USER_DATA, int CHAR);
+    void(*READ_LINE)(void* USER_DATA, char* BUFFER, UNK BUFFER_SIZE);
+
+} TEXT;
+ 
+void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT);
 void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE);
 void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTER);
 
@@ -154,9 +170,27 @@ void MACRO_TERMINATE_WHILE(FILE_SEMANTIC* SEMANTIC);
 unsigned MACRO_BIT_SIZE(unsigned BIT_SIZE);
 void OUT_OF_MEMORY(void);
 
-static char* DIRECTIVE_TYPES[DIRECTIVE_MAX] = {"if", "elseif", "else", "endc", "endif"};
-static char** DIRECTIVE_PARAMS;
-extern UINT* DIRECTIVE_TOTAL_PARAMS;
+bool ASSEMBLE_FILE_CALLBACK
+(
+    FILE* INPUT_FILE,
+    FILE* OUTPUT_FILE,
+    FILE* LISTING_FILE,
+    FILE* SYMBOL_FILE,
+    char* INPUT_FILE_PATH,
+    void USER_DATA(void)
+);
+
+bool ASSEMBLE_BASE
+(
+    TEXT* INPUT_CALLBACK,
+    TEXT* OUTPUT_CALLBACK,
+    TEXT* ERROR_CALLBACK,
+    TEXT* LISTING_CALLBACK,
+    TEXT* SYMBOL_CALLBACK,
+    char* INPUT_FILE_PATH,
+    void(*USER_DATA(void))
+
+);
 
 #endif
 #endif

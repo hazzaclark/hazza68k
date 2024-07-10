@@ -485,7 +485,7 @@ bool ASSEMBLE_FILE_CALLBACK
     FILE* LISTING_FILE,
     FILE* SYMBOL_FILE,
     char* INPUT_FILE_PATH,
-    void(*USER_DATA(void))
+    void USER_DATA(void)
 )
 {
     TEXT* INPUT_CALLBACK;

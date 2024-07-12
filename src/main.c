@@ -12,43 +12,15 @@
 
 #ifdef USE_DISASM
 
-static FILE* INPUT_FILE;
-static FILE* OUTPUT_FILE;
-static FILE* LISTING_FILE;
-static FILE* SYMBOL_FILE;
-
-static char* INPUT_FILE_PATH;
-static char* OUTPUT_FILE_PATH;
-static char* LISTING_FILE_PATH;
-static char* SYMBOL_FILE_PATH;
-
-/* THIS FUNCTION SERVES TO PROVIDE A SURROGATE MEANS OF DECLUTTERING */
-/* THE MAIN FUNCTION WITH VERBOSE STATEMENTS */
-
-void CHECK_VALID_ARGS(void)
-{
-    if(OUTPUT_FILE_PATH == NULL)
-    {
-        fprintf(stderr, "Output file path must be specified using '-o");
-    }
-
-    else
-    {
-        INPUT_FILE = (INPUT_FILE_PATH == NULL) ? stdin : fopen(INPUT_FILE_PATH, "r");
-        OUTPUT_FILE = (OUTPUT_FILE_PATH == NULL) ? stdout : fopen(OUTPUT_FILE_PATH, "wb");
-        LISTING_FILE = (LISTING_FILE_PATH == NULL) ? 0 : fopen(LISTING_FILE_PATH, "w");
-        SYMBOL_FILE = (SYMBOL_FILE_PATH == NULL) ? 0 : fopen(SYMBOL_FILE_PATH, "wb");
-    }
-
-    fclose(LISTING_FILE);
-    fclose(OUTPUT_FILE);
-    fclose(INPUT_FILE);
-}
 
 int main(int argc, char** argv)
 {
     bool PRINT_USAGE = false;
     int INDEX;         
+
+    char* INPUT_FILE_PATH;
+    char* OUTPUT_FILE_PATH;
+
 
     /* WE CHECK TO SEE IF THE CODE CONDITION OF THE PROGRAM */
     /* IS MET BEFORE DISPLAYING CONTENTS */
@@ -115,13 +87,32 @@ int main(int argc, char** argv)
     }
     else
     {
-       CHECK_VALID_ARGS();
-    }
 
-    if(!ASSEMBLE_FILE_CALLBACK(INPUT_FILE, OUTPUT_FILE, LISTING_FILE, SYMBOL_FILE, INPUT_FILE_PATH, CHECK_VALID_ARGS))
-    {
-        fprintf(stderr, "Could not assemble file");
-        return 1;
+        FILE* INPUT_FILE;
+        FILE* OUTPUT_FILE;
+
+       if(OUTPUT_FILE_PATH == NULL)
+       {
+            fprintf(stderr, "Output file path must be specified with '-o'");
+       }
+
+       else
+       {
+
+            if(INPUT_FILE_PATH == NULL) INPUT_FILE = stdin;
+            else INPUT_FILE = fopen(INPUT_FILE_PATH, "r");
+
+            OUTPUT_FILE = fopen(OUTPUT_FILE_PATH, "wb");
+                
+            if(INPUT_FILE && OUTPUT_FILE && INPUT_FILE_PATH == NULL)
+            {
+                fprintf(stderr, "Could not Assemble");
+            }
+
+            fclose(OUTPUT_FILE);
+        }
+
+        fclose(INPUT_FILE);
     }
 
     return 0;

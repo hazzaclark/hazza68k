@@ -176,21 +176,19 @@ bool ASSEMBLE_FILE_CALLBACK
     FILE* OUTPUT_FILE,
     FILE* LISTING_FILE,
     FILE* SYMBOL_FILE,
-    char* INPUT_FILE_PATH,
-    void USER_DATA(void)
+    char* INPUT_FILE_PATH
 );
 
-bool ASSEMBLE_BASE
-(
-    TEXT* INPUT_CALLBACK,
-    TEXT* OUTPUT_CALLBACK,
-    TEXT* ERROR_CALLBACK,
-    TEXT* LISTING_CALLBACK,
-    TEXT* SYMBOL_CALLBACK,
-    char* INPUT_FILE_PATH,
-    void(*USER_DATA(void))
+static inline int READ_CHAR(void* USER_DATA)
+{
+    int ARG = fgetc((FILE*)USER_DATA);
+    return ARG == EOF ? -1 : ARG;
+}
 
-);
+static inline char* READ_LINE(void* USER_DATA, char* BUFFER, UNK* BUFFER_SIZE)
+{
+    return fgets(BUFFER, BUFFER_SIZE, (FILE*)USER_DATA);
+}
 
 #endif
 #endif

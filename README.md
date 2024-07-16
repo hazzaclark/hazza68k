@@ -1,4 +1,4 @@
-# 68K_ASM
+# hazza68k
 My memory efficient Motorola 68000 Assembler 
 
 # Motive:

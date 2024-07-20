@@ -48,13 +48,16 @@ void ASSEMBLE_FILE(FILE* INPUT)
 
             switch (NEWLINE_CHAR)
             {
-            case '\0':
-            case '\r':
-            case '\n':
-                break;
+                case '\0':
+                case '\r':
+                case '\n':
+                    break;
             
-            default:
-                if (NEWLINE_CHAR == '\0' || NEWLINE_CHAR == '\r' || NEWLINE_CHAR == '\n')
+                default:
+                    if (NEWLINE_CHAR == '\0' || NEWLINE_CHAR == '\r' || NEWLINE_CHAR == '\n')
+                    {
+                        FILE_STATE->WRITE_BUFFER[ARBITARY_LINE_INDEX] = '\0';
+                    }
                     break;
             }
         }
@@ -105,7 +108,7 @@ void ASSEMBLE_FILE(FILE* INPUT)
         if (ASSEMBLER->LISTING_FILE != NULL)
         {
             ASSEMBLER->LISTING_COUNT = 0;
-            fprintf(stdin, (char*)ASSEMBLER->LISTING_FILE, "%0x0", &ASSEMBLER->PC);
+            fprintf(ASSEMBLER->LISTING_FILE, "%0x0", ASSEMBLER->PC);
         }
 
         ASSEMBLE_LINE(FILE_STATE, FILE_STATE->LINE_BUFFER);
@@ -116,17 +119,10 @@ void ASSEMBLE_FILE(FILE* INPUT)
         /* BASED ON THE INDEXXING POINTER PASSED THROUGH THE LEXER */
         /* OUTPUT THE CORRESPONDING CHAR TO THE LISTING FILE */
 
-        if(ASSEMBLER->LISTING_FILE != NULL)
+        if (ASSEMBLER->LISTING_FILE != NULL)
         {
-            unsigned INDEX;
-
-            for (INDEX += sizeof(ASSEMBLER->LISTING_COUNT) * 2 + sizeof(ASSEMBLER->LISTING_COUNT) / 2; INDEX < 31; ++INDEX)
-            {
-                fputc(' ', ASSEMBLER->LISTING_FILE);
-            }
-
-            fprintf(ASSEMBLER->LISTING_FILE, "%s\n", FILE_STATE->LINE_BUFFER);
-            
+            fprintf(stderr, "Writing to listing file: %08x %s\n", ASSEMBLER->PC, FILE_STATE->WRITE_BUFFER); // Debug print statement
+            fprintf(ASSEMBLER->LISTING_FILE, "%08x %s\n", ASSEMBLER->PC, FILE_STATE->WRITE_BUFFER);
         }
     }
 

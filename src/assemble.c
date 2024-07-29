@@ -123,9 +123,15 @@ void ASSEMBLE_FILE(FILE* INPUT)
         }
     }
 
+    if(ASSEMBLER->INPUT_FILE == NULL)
+    {
+        fprintf(stderr, "Input file could not be found. Check the path declaration\n");
+        exit(1);
+    }
+
     if(ASSEMBLER->OUTPUT_FILE == NULL)
     {
-        fprintf(stderr, "Nuh uh\n");
+        fprintf(stderr, "Output file could not be found. Check the path declaration\n");
         exit(1);
     }
 

@@ -19,7 +19,7 @@
 /* READ THE CORRESPONDENCE ONE LINE AT A TIME IN A BIG ENDIAN FASHION */
 /* PARSED THROUGH THE ASSEMBLE LINE FUNCTION */
 
-void ASSEMBLE_FILE()
+void ASSEMBLE_FILE(FILE* INPUT)
 {   
     struct FILE_SEMANTIC* FILE_STATE = malloc(sizeof(struct FILE_SEMANTIC));
     struct ASSEMBLER* ASSEMBLER = malloc(sizeof(struct ASSEMBLER));
@@ -27,7 +27,7 @@ void ASSEMBLE_FILE()
     FILE_STATE->WRITE_BUFFER = (char*)FILE_STATE->LINE_BUFFER;
     FILE_STATE->END_OF_FILE = 0;
 
-    while(!FILE_STATE->END_OF_FILE && fgets(FILE_STATE->WRITE_BUFFER, sizeof(FILE_STATE->LINE_BUFFER), 0))
+    while(!FILE_STATE->END_OF_FILE && fgets(FILE_STATE->WRITE_BUFFER, sizeof(FILE_STATE->LINE_BUFFER), INPUT))
     {
         size_t ARBITARY_LINE_INDEX = 0;
         char NEWLINE_CHAR = 0;
@@ -123,10 +123,9 @@ void ASSEMBLE_FILE()
         }
     }
 
-    
     if(ASSEMBLER->OUTPUT_FILE == NULL)
     {
-        fprintf(stderr, "Assembly failed\n");
+        fprintf(stderr, "Nuh uh\n");
         exit(1);
     }
 

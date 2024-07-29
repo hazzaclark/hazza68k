@@ -19,16 +19,15 @@
 /* READ THE CORRESPONDENCE ONE LINE AT A TIME IN A BIG ENDIAN FASHION */
 /* PARSED THROUGH THE ASSEMBLE LINE FUNCTION */
 
-void ASSEMBLE_FILE(FILE* INPUT)
+void ASSEMBLE_FILE()
 {   
     struct FILE_SEMANTIC* FILE_STATE = malloc(sizeof(struct FILE_SEMANTIC));
     struct ASSEMBLER* ASSEMBLER = malloc(sizeof(struct ASSEMBLER));
-    int FILE_MODE = 0;
 
     FILE_STATE->WRITE_BUFFER = (char*)FILE_STATE->LINE_BUFFER;
     FILE_STATE->END_OF_FILE = 0;
 
-    while(!FILE_STATE->END_OF_FILE && fgets(FILE_STATE->WRITE_BUFFER, sizeof(FILE_STATE->LINE_BUFFER), INPUT))
+    while(!FILE_STATE->END_OF_FILE && fgets(FILE_STATE->WRITE_BUFFER, sizeof(FILE_STATE->LINE_BUFFER), 0))
     {
         size_t ARBITARY_LINE_INDEX = 0;
         char NEWLINE_CHAR = 0;
@@ -67,7 +66,7 @@ void ASSEMBLE_FILE(FILE* INPUT)
 
         /* ONCE NO LONGER NECESSARY, FREE UP THAT MEMORY */ 
 
-        FILE_STATE->WRITE_BUFFER += FILE_STATE->LINE_CHAR;
+        FILE_STATE->WRITE_BUFFER += ARBITARY_LINE_INDEX;
 
         /* ASSUMING THERE IS NO NEW LINE TO PARSE, WE HAVE REACHED THE END OF THE FILE */
         /* AND OR THE LINE WAS TOO BIG FOR THE BUFFER TO ACCOUNT FOR */
@@ -76,8 +75,6 @@ void ASSEMBLE_FILE(FILE* INPUT)
 
         if (NEWLINE_CHAR == '\0')
         {
-            FILE_STATE->LINE_CHAR += 1, fgetc(INPUT);
-
             if(FILE_STATE->LINE_CHAR == 0)
             {
                 PRINT_SEMANTIC(stderr, "The line was too big to parse into the Internal Buffer\n", 0);
@@ -86,7 +83,7 @@ void ASSEMBLE_FILE(FILE* INPUT)
 
                 while (FILE_STATE->LINE_CHAR == '\r' && FILE_STATE->LINE_CHAR == '\n' && FILE_STATE->LINE_CHAR == 0)
                 {
-                    FILE_STATE->LINE_CHAR += 1, fgetc(INPUT);
+                    FILE_STATE->LINE_CHAR++;
                 }
             }
         }
@@ -126,27 +123,14 @@ void ASSEMBLE_FILE(FILE* INPUT)
         }
     }
 
-    /* ASSUMING THAT THE INDEX POINTER ISN'T PARSING A NORMAL MODE WHEN A FILE ENDS */
-    /* THIS IS ASSUMING THERE IS AN ENDIF OR ENDC/ENDR MACRO AT THE END OF THE FILE */
-    /* THEN RUN THESE ENUM CHECKS */
-
-    switch (FILE_MODE)
-    {
-    case MODE_NORMAL:
-        break;
-
-    case MODE_REPEAT:
-        MACRO_TERMINATE(FILE_STATE);
-        PRINT_SEMANTIC(FILE_STATE, "REPT Statement found at line %lu is missing ENDR directive in order to close the file", &FILE_STATE->LINE_BUFFER);
-        break;
-
-    case MODE_MACRO:
-        MACRO_TERMINATE(FILE_STATE);
-        PRINT_SEMANTIC(FILE_STATE, "MACRO Statement at line %lu is missing ENDR directive in order to close the file", &FILE_STATE->LINE_BUFFER);
     
-    default:
-        break;
+    if(ASSEMBLER->OUTPUT_FILE == NULL)
+    {
+        fprintf(stderr, "Assembly failed\n");
+        exit(1);
     }
+
+    fprintf(stdout, "Assembly Complete\n");
 
     free(FILE_STATE);
     free(ASSEMBLER);
@@ -157,11 +141,11 @@ void ASSEMBLE_FILE(FILE* INPUT)
 
 void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 {
-    struct DIRECTIVES* DIRECTIVES_BASE = malloc(sizeof(DIRECTIVES));
+    struct DIRECTIVES* DIRECTIVES_BASE = malloc(sizeof(struct DIRECTIVES));
     char* LABEL = NULL;
     UNK* LABEL_LENGTH = 0;
     UNK* DIRECTIVE_LENGTH = 0;
-    char* LINE_POINTER = NULL;
+    char* LINE_POINTER = SOURCE;
     int FILE_MODE = 0;
 
     char* DIRECTIVE_PARAMS = NULL;
@@ -171,7 +155,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
     if(SOURCE[0] == '*')
     {
-        memset((void*)SOURCE, 0, 0);
+        memset(SOURCE, 0, strlen(SOURCE));
     }
 
     /* ATTRIBUTE THE SOURCE OF THE LINE WITH THE RELATIVE SIZE OF SUCH AN INSTANCE */
@@ -242,7 +226,6 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
                 /* ALSO CHECK FOR SUBSEQUENT WHITESPACE */
 
                 FILE_STATE->AFTER_IF = LINE_POINTER + (*DIRECTIVE_LENGTH);
-
 
                 while(*FILE_STATE->AFTER_IF == ' ' || *FILE_STATE->AFTER_IF == '\t') FILE_STATE->AFTER_IF++;
 
@@ -335,7 +318,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
     }
 
 
-    free(LABEL);
+    free(DIRECTIVES_BASE);
 }
 
 /* ADD DIRECTIVE DEFINITIONS FOR THE ASSEMBLER TO LOOK OUT FOR WHEN PARSING LINES */

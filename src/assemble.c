@@ -22,7 +22,7 @@
 void ASSEMBLE_FILE(FILE* INPUT)
 {   
     struct FILE_SEMANTIC* FILE_STATE = malloc(sizeof(struct FILE_SEMANTIC));
-    struct ASSEMBLER* ASSEMBLER = malloc(sizeof(ASSEMBLER));
+    struct ASSEMBLER* ASSEMBLER = malloc(sizeof(struct ASSEMBLER));
     int FILE_MODE = 0;
 
     FILE_STATE->WRITE_BUFFER = FILE_STATE->LINE_BUFFER;
@@ -343,24 +343,26 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
 void ADD_DIRECTIVE_DEFINITION(void* STATE, char IDENTIFIER)
 {
-    struct FILE_SEMANTIC FILE_STATE;
+    struct FILE_SEMANTIC* FILE_STATE = malloc(sizeof(struct FILE_SEMANTIC));
 
     switch (IDENTIFIER)
     {
     case 0:
-        FILE_STATE.FILE_SYMBOL.TYPE = SYMBOL_CONST;
-        FILE_STATE.FILE_SYMBOL.SHARED_VALUE += sizeof(IDENTIFIER);
+        FILE_STATE->FILE_SYMBOL.TYPE = SYMBOL_CONST;
+        FILE_STATE->FILE_SYMBOL.SHARED_VALUE += sizeof(IDENTIFIER);
         break;
 
     case 1:
-        FILE_STATE.FILE_SYMBOL.TYPE = SYMBOL_VAR;
-        FILE_STATE.FILE_SYMBOL.SHARED_VALUE += sizeof(IDENTIFIER);
+        FILE_STATE->FILE_SYMBOL.TYPE = SYMBOL_VAR;
+        FILE_STATE->FILE_SYMBOL.SHARED_VALUE += sizeof(IDENTIFIER);
         break;
     
     default:
         PRINT_SEMANTIC(FILE_STATE, "Directive %lu cannot be found for this line", &STATE);
         break;
     }
+
+    free(FILE_STATE);
 }
 
 /* WHAT IT SAYS ON THE TIN, STORE THE RELEVANT MACRO SIZE SPECIFIER */

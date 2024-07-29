@@ -12,15 +12,16 @@
 
 #ifdef USE_DISASM
 
+static FILE* INPUT_FILE = NULL;
+static FILE* OUTPUT_FILE = NULL;
 
 int main(int argc, char** argv)
 {
     bool PRINT_USAGE = false;
     int INDEX;         
 
-    char* INPUT_FILE_PATH;
-    char* OUTPUT_FILE_PATH;
-
+    char* INPUT_FILE_PATH = NULL;
+    char* OUTPUT_FILE_PATH = NULL;
 
     /* WE CHECK TO SEE IF THE CODE CONDITION OF THE PROGRAM */
     /* IS MET BEFORE DISPLAYING CONTENTS */
@@ -44,7 +45,6 @@ int main(int argc, char** argv)
                         fprintf(stderr, "No input file path specified after '-i'.\n");
                         return EXIT_FAILURE;
                     }
-
                     continue;
                 case 'o':
                     if (INDEX + 1 < argc) 
@@ -58,11 +58,9 @@ int main(int argc, char** argv)
                         return EXIT_FAILURE;
                     }
                     continue;
-
                 case 'u':
                     PRINT_USAGE = true;
                     continue;
-
                 default:
                     fprintf(stderr, "Unknown option '-%c'.\n", argv[INDEX][1]);
                     return EXIT_FAILURE;
@@ -87,33 +85,37 @@ int main(int argc, char** argv)
     }
     else
     {
+        if(OUTPUT_FILE_PATH == NULL)
+        {
+            fprintf(stderr, "Output file path must be specified with '-o'\n");
+            return EXIT_FAILURE;
+        }
 
-        FILE* INPUT_FILE;
-        FILE* OUTPUT_FILE;
+        if(INPUT_FILE_PATH == NULL)
+            INPUT_FILE = stdin;
+        else
+            INPUT_FILE = fopen(INPUT_FILE_PATH, "r");
 
-       if(OUTPUT_FILE_PATH == NULL)
-       {
-            fprintf(stderr, "Output file path must be specified with '-o'");
-       }
+        if(INPUT_FILE == NULL)
+        {
+            fprintf(stderr, "Failed to open input file '%s'\n", INPUT_FILE_PATH);
+            return EXIT_FAILURE;
+        }
 
-       else
-       {
+        OUTPUT_FILE = fopen(OUTPUT_FILE_PATH, "wb");
 
-            if(INPUT_FILE_PATH == NULL) INPUT_FILE = stdin;
-            else INPUT_FILE = fopen(INPUT_FILE_PATH, "r");
-
-            OUTPUT_FILE = fopen(OUTPUT_FILE_PATH, "wb");
-                
-            if(INPUT_FILE && OUTPUT_FILE && INPUT_FILE_PATH == NULL)
-            {
-                fprintf(stderr, "Could not Assemble");
-            }
-
-            fclose(OUTPUT_FILE);
+        if(OUTPUT_FILE == NULL)
+        {
+            fprintf(stderr, "Failed to open output file '%s'\n", OUTPUT_FILE_PATH);
+            fclose(INPUT_FILE);
+            return EXIT_FAILURE;
         }
 
         fclose(INPUT_FILE);
+        fclose(OUTPUT_FILE);
     }
+
+    ASSEMBLE_FILE(INPUT_FILE);
 
     return 0;
 }

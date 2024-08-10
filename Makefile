@@ -5,7 +5,7 @@
 CC = gcc
 CFLAGS = -std=c99 -Wall -Wextra -Wparentheses -Werror -pedantic
 
-SRCS = main.c assemble.c dictionary.c macro.c
+SRCS = main.c assemble.c dictionary.c macro.c opcode.c
 OBJS = $(SRCS:.c=.o)
 
 TARGET = hazza68k

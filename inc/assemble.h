@@ -179,12 +179,14 @@ bool ASSEMBLE_FILE_CALLBACK
     char* INPUT_FILE_PATH
 );
 
+ASM_UNUSED
 static int READ_CHAR(void* USER_DATA)
 {
     int ARG = fgetc((FILE*)USER_DATA);
     return ARG == EOF ? -1 : ARG;
 }
 
+ASM_UNUSED
 static char* READ_LINE(void* USER_DATA, char* BUFFER, UNK* BUFFER_SIZE)
 {
     return fgets(BUFFER, *(int*)BUFFER_SIZE, (FILE*)USER_DATA);

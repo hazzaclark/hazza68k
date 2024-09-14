@@ -1,22 +1,49 @@
-## COPYRIGHT (C) HARRY CLARK 2023
-
+## COPYRIGHT (C) HARRY CLARK 2024
 ## MOTOROLA 68000 ASSEMBLER
-  
-CC = gcc
-CFLAGS = -std=c99 -Wall -Wextra -Wparentheses -Werror -pedantic
 
-SRCS = main.c assemble.c dictionary.c macro.c opcode.c
-OBJS = $(SRCS:.c=.o)
+#########################################################################
+##				PREFIXES			       ##
+#########################################################################
 
-TARGET = hazza68k
+CC 				=		$(PREFIX)gcc
+AR				=		$(PREFIX)ar
+WARNINGS		=		-std=c90 -Wall -Wextra -Wparentheses -Werror -pedantic
+SRC				= 		src
+INC				=		inc
+
+#########################################################################
+##				FILE ACCESS			       ##
+#########################################################################
+
+68K_FILES	=		$(wildcard $(SRC)/*.c)
+68K_OBJS	=		$(68K_FILES:$(SRC)/%.c=$(SRC)/%.o)
+
+#########################################################################
+##			    TARGET LINKING			       ##
+#########################################################################
+
+## ADJUST THE FILE EXTENSION TO SUIT WHICHEVER FILE EXT YOU NEED
+## CONSULT THE README FOR DIRECTIONS
+
+TARGET 		=		hazza68k
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+$(TARGET): $(68K_OBJS)
+	$(AR) rcs $@ $^
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
+$(SRC)/%.o: $(SRC)/%.c
+	$(CC) $(WARNINGS) -I$(INC) -c $< -o $@
+
+#########################################################################
+##				CLEANUP 			       ##
+#########################################################################
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(SRC)/*.o $(TARGET)
+
+.PHONY: clean
+
+#########################################################################
+##				MISC.				       ##
+#########################################################################

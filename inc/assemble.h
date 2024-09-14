@@ -187,7 +187,7 @@ static int READ_CHAR(void* USER_DATA)
 
 static char* READ_LINE(void* USER_DATA, char* BUFFER, UNK* BUFFER_SIZE)
 {
-    return fgets(BUFFER, BUFFER_SIZE, (FILE*)USER_DATA);
+    return fgets(BUFFER, *(int*)BUFFER_SIZE, (FILE*)USER_DATA);
 }
 
 #endif

@@ -161,7 +161,7 @@ typedef struct TEXT
 
 } TEXT;
  
-void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, FILE* INPUT);
+void ASSEMBLE_FILE(FILE* INPUT);
 void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE);
 void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTER);
 
@@ -179,13 +179,13 @@ bool ASSEMBLE_FILE_CALLBACK
     char* INPUT_FILE_PATH
 );
 
-static inline int READ_CHAR(void* USER_DATA)
+static int READ_CHAR(void* USER_DATA)
 {
     int ARG = fgetc((FILE*)USER_DATA);
     return ARG == EOF ? -1 : ARG;
 }
 
-static inline char* READ_LINE(void* USER_DATA, char* BUFFER, UNK* BUFFER_SIZE)
+static char* READ_LINE(void* USER_DATA, char* BUFFER, UNK* BUFFER_SIZE)
 {
     return fgets(BUFFER, BUFFER_SIZE, (FILE*)USER_DATA);
 }

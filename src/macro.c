@@ -79,7 +79,7 @@ void MACRO_TERMINATE_WHILE(FILE_SEMANTIC* SEMANTIC)
     {
         SEMANTIC->SOURCE_LINE = NODE.SOURCE_LINE;
 
-        if(EXP->NODE.IS_EXPRESSION == false)
+        if(EXP->NODE.IDENTIFIER == false)
         {
             PRINT_SEMANTIC(SEMANTIC, "Expression must be evaluable on the first instance\n", 0);
             break;

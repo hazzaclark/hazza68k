@@ -234,7 +234,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
                 while(*FILE_STATE->AFTER_IF == ' ' || *FILE_STATE->AFTER_IF == '\t') FILE_STATE->AFTER_IF++;
 
-                if((FILE_STATE->AFTER_IF) != '\0')
+                if((*FILE_STATE->AFTER_IF) != '\0')
                 {
                     fprintf(stderr, "Unexpected If Level after execution\n");
                     exit(EXIT_FAILURE);
@@ -261,7 +261,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
         {
             #ifdef USE_DICTIONARY
 
-            struct DICTIONARY_ENTRY* ENTRY = DICTIONARY_LOOKUP(LINE_POINTER, *DIRECTIVE_LENGTH, 0);
+            struct DICTIONARY_ENTRY* ENTRY = DICTIONARY_LOOKUP(FILE_STATE, (char*)DIRECTIVE_LENGTH, 0);
 
             /* IF THERE IS NO RELEVANT ENTRY IN RELATION TO THE SYMBOL TYPE */
             /* CREATE A NEW ENTRY AND PARSE THOSE CONTENTS */

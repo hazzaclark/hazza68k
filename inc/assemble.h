@@ -36,7 +36,7 @@ static INSTRUCTION* TYPE ## VALUE(int, char*, char*, int*)
 #define         PARAM_TOTAL                   1
 #define         PARAM_SUFFIX                  ''
 
-#define PRINT_SEMANTIC(STATE, COMMENT, ADDRESS) fprintf(stderr,"%lu:\n", STATE, COMMENT, ADDRESS)
+#define PRINT_SEMANTIC(STATE, COMMENT, ADDRESS) fprintf(stderr, COMMENT)
 #define PRINT_INTERNAL(STATE) fputs(stderr, " ", STATE)
 
 typedef struct ASSEMBLER

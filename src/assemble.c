@@ -118,8 +118,8 @@ void ASSEMBLE_FILE(FILE* INPUT)
 
         if (ASSEMBLER->LISTING_FILE != NULL)
         {
-            fprintf(stderr, "Writing to listing file: %08x %s\n", ASSEMBLER->PC, FILE_STATE->WRITE_BUFFER); // Debug print statement
-            fprintf(ASSEMBLER->LISTING_FILE, "%08x %s\n", ASSEMBLER->PC, FILE_STATE->WRITE_BUFFER);
+            fprintf(stderr, "Writing to listing file: %s\n", (char*)ASSEMBLER->PC); 
+            fprintf(ASSEMBLER->LISTING_FILE, (char*)ASSEMBLER->PC, FILE_STATE->WRITE_BUFFER);
         }
     }
 

@@ -153,8 +153,6 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
     char* LINE_POINTER = SOURCE;
     int FILE_MODE = 0;
 
-    char* DIRECTIVE_PARAMS = NULL;
-
     /* THIS EVOKES THAT IF THE SOURCE OF THE LINE IS INDEXXED AS ANY DERIVATIVE */
     /* RETURN THE CORRESPONDENCE */
 
@@ -276,9 +274,10 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
             else
             {
                 LINE_POINTER += strspn(LINE_POINTER, DIRECTIVE_CHARS);
-                DIRECTIVE_PARAMS += (char)fprintf((FILE*)FILE_STATE, "Invalid parameters pertaining to Directive: %08x");
             }
         }
+
+        break;
 
         case MODE_REPEAT: /* ASSUMES THAT THERE IS AN ENDR DIRECTIVE - OTHERWISE, CONTINUE TO READ THE LINE */
 
@@ -286,7 +285,6 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
             {
                 printf("Directive: '%s' found\n", DIRECTIVES_BASE->KEY);
                 PARSE_LINE(FILE_STATE, SOURCE, LABEL, LINE_POINTER);
-                break;
             }
 
          break;
@@ -312,7 +310,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
             if(LABEL != NULL)
             {
-                fprintf(stderr, "Short Macros shouldn't assert labels '%p");
+                fprintf(stderr, "Short Macros shouldn't assert labels");
             }
 
          break;
@@ -329,7 +327,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 /* ADD DIRECTIVE DEFINITIONS FOR THE ASSEMBLER TO LOOK OUT FOR WHEN PARSING LINES */
 /* THIS WILL BE THE ASSEMBLERS WAY OF BEING ABLE TO IDENTIFY ELEMENTS */
 
-void ADD_DIRECTIVE_DEFINITION(void* STATE, char IDENTIFIER)
+void ADD_DIRECTIVE_DEFINITION(char IDENTIFIER)
 {
     struct FILE_SEMANTIC* FILE_STATE = malloc(sizeof(struct FILE_SEMANTIC));
 
@@ -346,7 +344,7 @@ void ADD_DIRECTIVE_DEFINITION(void* STATE, char IDENTIFIER)
         break;
     
     default:
-        PRINT_SEMANTIC(FILE_STATE, "Directive %lu cannot be found for this line", &STATE);
+        PRINT_SEMANTIC(FILE_STATE, "Directive cannot be found for this line", 0);
         break;
     }
 
@@ -429,8 +427,8 @@ void STORE_MACRO_PARAMS(void)
 void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTER)
 {
     int RESULT = 0;
-    struct ASSEMBLER* ASM = malloc(sizeof(ASSEMBLER));
-    struct LOCATION* LOCATION = malloc(sizeof(LOCATION));
+    struct ASSEMBLER* ASM = malloc(sizeof(struct ASSEMBLER));
+    struct LOCATION* LOCATION = malloc(sizeof(struct LOCATION));
 
     ULONG* PC_START_OFFSET = ASM->PC;
     UNK* PC_START_OFFSET_POS = (UNK*)FILE_STATE->OFFSET_POS;

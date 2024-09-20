@@ -147,9 +147,11 @@ void ASSEMBLE_FILE(FILE* INPUT)
 void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 {
     struct DIRECTIVES* DIRECTIVES_BASE = malloc(sizeof(struct DIRECTIVES));
+    struct DICTIONARY_ENTRY* LOOKUP = malloc(sizeof(struct DICTIONARY_ENTRY));
+
     char* LABEL = NULL;
     UNK* LABEL_LENGTH = 0;
-    UNK* DIRECTIVE_LENGTH = 0;
+    char* DIRECTIVE_LENGTH = 0;
     char* LINE_POINTER = SOURCE;
     int FILE_MODE = 0;
 
@@ -159,6 +161,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
     if(SOURCE[0] == '*')
     {
         memset(SOURCE, 0, strlen(SOURCE));
+        return;
     }
 
     /* ATTRIBUTE THE SOURCE OF THE LINE WITH THE RELATIVE SIZE OF SUCH AN INSTANCE */
@@ -167,8 +170,8 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
     /* FROM THERE, THE ASSEMBLER WILL EVALUATE EACH RESPECTIVE ELEMENT OF THE LINE */
     /* BY DETERMINING THE LENGTH OF THE LINE BASED ON THE AMOUNT OF CHARS */
 
-    FILE_STATE->SOURCE_LINE += *SOURCE;
-    LINE_POINTER += *SOURCE || LABEL;
+    FILE_STATE->SOURCE_LINE = SOURCE;
+    LINE_POINTER = SOURCE;
 
     if(LABEL_LENGTH != 0)
     {
@@ -228,10 +231,6 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
                 /* CHECK THE SEE IF THERE IS ANY CONCURRENT CODE AFTER THE IF STATEMENT */
                 /* ALSO CHECK FOR SUBSEQUENT WHITESPACE */
 
-                FILE_STATE->AFTER_IF = LINE_POINTER + (*DIRECTIVE_LENGTH);
-
-                while(*FILE_STATE->AFTER_IF == ' ' || *FILE_STATE->AFTER_IF == '\t') FILE_STATE->AFTER_IF++;
-
                 if((*FILE_STATE->AFTER_IF) != '\0')
                 {
                     fprintf(stderr, "Unexpected If Level after execution\n");
@@ -259,7 +258,8 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
         {
             #ifdef USE_DICTIONARY
 
-            struct DICTIONARY_ENTRY* ENTRY = DICTIONARY_LOOKUP(FILE_STATE, (char*)DIRECTIVE_LENGTH, 0);
+            struct DICTIONARY_ENTRY* ENTRY = DICTIONARY_LOOKUP(LOOKUP, DIRECTIVE_LENGTH, 0);
+
 
             /* IF THERE IS NO RELEVANT ENTRY IN RELATION TO THE SYMBOL TYPE */
             /* CREATE A NEW ENTRY AND PARSE THOSE CONTENTS */
@@ -273,7 +273,14 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
             }
             else
             {
+                char* PARAMS = 0;
+                unsigned TOTAL_PARAMS = 0;
+
+                /* EVALUATE THE NEW LENGTH OF THE CURRENT LINE POINTER */
+                /* AS WELL AS THE DESIGNATED PARAMETERS FOUND IN THE CURRENT LOCATION */
+
                 LINE_POINTER += strspn(LINE_POINTER, DIRECTIVE_CHARS);
+                PARAMS += *(char*)malloc(sizeof(FILE_STATE)); 
             }
         }
 
@@ -322,6 +329,7 @@ void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
 
 
     free(DIRECTIVES_BASE);
+    free(LOOKUP);
 }
 
 /* ADD DIRECTIVE DEFINITIONS FOR THE ASSEMBLER TO LOOK OUT FOR WHEN PARSING LINES */

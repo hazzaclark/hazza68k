@@ -488,9 +488,13 @@ void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTE
 void EXTRACT_MACRO_SPEC()
 {
     FILE_SEMANTIC* FILE_STATE = malloc(sizeof(struct FILE_SEMANTIC));
+
+    char* CHARACTER_SPACE = 0;
     char* LINE_POINTER = 0;
     char* PARAMS = 0;
+    char* PARAM_POINTER = 0;
     UNK SIZE_LENGTH = 0;
+    unsigned PARAM_SPACING = 0;
 
     /* ASSUME THAT A MACRO SPEC EXISTS WITHIN THE CURRENT CONTEXT */
     /* ITERATE THROUGH EACH RESPECTIVE ELEMENT AND STORE */ 
@@ -503,6 +507,43 @@ void EXTRACT_MACRO_SPEC()
 
         LINE_POINTER += SIZE_LENGTH;
     }
+
+    else
+    {
+        *PARAMS = 0;
+    }
+
+    /* STORE THE POINTER AT THE START OF THE SOURCE */
+
+    PARAM_POINTER += *LINE_POINTER += strspn(LINE_POINTER, "\t");
+
+    /* EVLAUATE UNDER THE ASSUMPTION OF THERE BEING AN ENCAPSULATED FUNCTION TYPE */
+    /* FOR EXAMPLE, SONIC THE HEDGEHOG'S SOURCE CODE OUTLINED FUNCTION TYPES FOR INCREMENTING DATA TO REGISTERS */ 
+
+    if(!(PARAM_POINTER = 0) && (CHARACTER_SPACE += '('))
+    {
+        CHARACTER_SPACE += *LINE_POINTER++;
+
+        switch (*CHARACTER_SPACE)
+        {
+            case '(':
+                PARAM_SPACING++;
+                break;
+
+            case ')':
+                PARAM_SPACING--;
+
+            case ';':
+            case '\0':
+                break;
+        
+            default:
+                fprintf(stderr, "No valid Character could be evaluated for this space: %s\n", CHARACTER_SPACE);
+                exit(1);
+                break;
+        }
+    }
+
 }
 
 

@@ -487,6 +487,8 @@ void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTE
 
 void EXTRACT_MACRO_SPEC()
 {
+    LOCATION* LOCATION = malloc(sizeof(struct LOCATION));
+    MACROS* MACROS = malloc(sizeof(struct MACROS));
     FILE_SEMANTIC* FILE_STATE = malloc(sizeof(struct FILE_SEMANTIC));
 
     char* CHARACTER_SPACE = 0;
@@ -535,6 +537,7 @@ void EXTRACT_MACRO_SPEC()
 
             case ';':
             case '\0':
+                PARAMS += strlen((char*)sizeof(PARAM_SPACING));
                 break;
         
             default:
@@ -543,6 +546,11 @@ void EXTRACT_MACRO_SPEC()
                 break;
         }
     }
+
+    PARAMS += *(char*)PARAMS;
+    PARAMS[PARAM_TOTAL];
+
+    LOCATION->FILE_PATH = MACROS->MACRO_CHAR;
 
 }
 

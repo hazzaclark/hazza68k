@@ -534,10 +534,11 @@ void EXTRACT_MACRO_SPEC()
 
             case ')':
                 PARAM_SPACING--;
+                break;
 
             case ';':
             case '\0':
-                PARAMS += strlen((char*)sizeof(PARAM_SPACING));
+                PARAMS = (char*)sizeof(PARAM_SPACING);
                 break;
         
             default:
@@ -547,12 +548,26 @@ void EXTRACT_MACRO_SPEC()
         }
     }
 
+    /* NOW, DETERMINE ANY AND ALL DUPLICATES FROM THE PRE-EXISTING PARAMETERS */
+    /* WE CAN DO SO BY ADDING TO THE PRE-EXISTING TYPE */ 
+
     PARAMS += *(char*)PARAMS;
-    PARAMS[PARAM_TOTAL];
+
+    /* INVOKE THE CORRESPONDING MACRO BY DETERMINING THE LOCATIOON */
 
     LOCATION->FILE_PATH = MACROS->MACRO_CHAR;
+    LOCATION->LINE_POS = 0;
+    LOCATION->PREV = FILE_STATE->SOURCE_LINE;
 
+    /* ITERATE OVER EACH RESPECTIVE LINE THAT THE MACRO ENCOMPASSES */
+    /* TAKE INTO ACCOUNT TAB INDENTATION */
+
+    for (char INDEX = (*(char*)MACROS->LINE_POINTER); (INDEX != 0); INDEX++)
+    {
+        FILE_STATE->SOURCE_LINE = (char*)MACROS->MACRO_CURRENT_LINE;
+        LOCATION->LINE_POS++;
+    }
+    
 }
-
 
 #endif

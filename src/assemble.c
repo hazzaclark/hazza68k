@@ -26,7 +26,7 @@ void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, TEXT* TEXT_INPUT, TEXT* CALLBACK)
     LINE_WRITER = (char*)FILE_STATE->LINE_BUFFER;
     FILE_STATE->END_OF_FILE = 0;
 
-    while(!FILE_STATE->END_OF_FILE && fgets(FILE_STATE->WRITE_BUFFER, &FILE_STATE->LINE_BUFFER - LINE_WRITER, CALLBACK))
+    while(!FILE_STATE->END_OF_FILE && fgets(FILE_STATE->WRITE_BUFFER, *FILE_STATE->LINE_BUFFER - *LINE_WRITER, (FILE*)CALLBACK) != NULL)
     {
         size_t ARBITARY_LINE_INDEX = 0;
         char NEWLINE_CHAR = 0;
@@ -116,12 +116,41 @@ void ASSEMBLE_FILE(FILE_SEMANTIC* FILE_STATE, TEXT* TEXT_INPUT, TEXT* CALLBACK)
                 printf("MACRO statement found on line %lu, missing an ENDM directive", FILE_STATE->SOURCE_LINE);
 
             case MODE_REPEAT:
+                MACRO_TERMINATE(FILE_STATE);
+                printf("REPT statement found on line %lu, missing an ENDR directive", FILE_STATE->SOURCE_LINE);
                 break;
-        
-            default:
+
+            case MODE_WHILE:
+                MACRO_TERMINATE(FILE_STATE);
+                printf("WHILE statement found on line %lu, missing an ENDW directive", FILE_STATE->SOURCE_LINE);
                 break;
         }
     }
+}
+
+void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE)
+{
+    UNK LABEL_LENGTH = 0;
+    char* SOURCE_LINE_PTR = 0;
+    char* LABEL_DIR = 0;
+    UNK DIRECTIVE_LENGTH = 0;
+
+    FILE_STATE->SOURCE_LINE = SOURCE;
+    SOURCE_LINE_PTR = SOURCE;
+
+    /* PARSE THE CURRENT LABEL LENGTH ASSUMING THAT THERE IS ANY AT ALL */
+    /* LABELS ARE ENCOMPASSED BY DEFINNG A FUNCTION OR A METHOD IN ASSEMBLY */
+    /* THROUGH THE MEANS OF:                                                 */
+    /* MY_LABEL:                                                             */
+    /*          MOVE.L D0, (-SP)                                             */ 
+
+    LABEL_LENGTH = strspn(SOURCE_LINE_PTR, LABEL_CHARS);
+    SOURCE_LINE_PTR += strspn(SOURCE_LINE_PTR, "\t");
+
+    if(LABEL_LENGTH == 0) { LABEL_DIR = NULL; }
+
+    else { SOURCE_LINE_PTR += LABEL_LENGTH; }
+
 }
 
 

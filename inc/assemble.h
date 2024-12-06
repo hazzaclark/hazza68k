@@ -84,17 +84,21 @@ typedef struct OPTIONS
 #define         M68K_MNEMONIC_NAME      MNEOMONIC_BASE.NAME
 #define         M68K_MNEMONIC_OPCODES   MNEOMONIC.OPCODES
 
-#define         M68K_OPTION_NAME        OPTIONS.NAME
-#define         M68K_OPTION_HELP        OPTIONS.HELP
-#define         M68K_OPTION_SET         OPTIONS.SET
-#define         M68K_OPTION_RESET       OPTIONS.RESET
+#define         M68K_OPTION_NAME        OPTIONS_BASE.NAME
+#define         M68K_OPTION_HELP        OPTIONS_BASE.HELP
+#define         M68K_OPTION_SET         OPTIONS_BASE.SET
+#define         M68K_OPTION_RESET       OPTIONS_BASE.RESET
 
 //=================================================
 //=================================================
 
 STATIC OPTIONS OPTION[] = 
 {
-    {       "--68000",      "\t\\tTarget M68000 CPU"}
+    {       '--68000',      '\t\\tTarget M68000 CPU', FLAG_68000},
+    {       '--68010',      '\t\\tTarget M68010 CPU', FLAG_68010},
+    {       '--68000',      '\t\\tTarget M68020 CPU', FLAG_68020},
+    {       '--68010',      '\t\\tTarget M68030 CPU', FLAG_68030},
+    {       '--stdout',     '\t\\tSend Output to Console', 0}
 };
 
 //=================================================

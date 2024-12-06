@@ -59,9 +59,20 @@ int HANDLE_OPTION(const char* ARG)
     
 }
 
+void DISPLAY_HELP(const char* NAME)
+{
+    printf("Usage: %s {options} {filename}\n Options:-\n", NAME);
+
+    for(OPTIONS* O = OPTION; OPTION_BASE->NAME; O++)
+    {
+        printf("\t%s%s\n", O->NAME, O->HELP);
+    }
+}
+
 int PARSE_ARGS(int argc, char** argv)
 {
     int INDEX = 0;
+    int OPTION_FLAG = 0;
 
     for(INDEX = 1; INDEX < argc; INDEX++)
     {
@@ -69,8 +80,16 @@ int PARSE_ARGS(int argc, char** argv)
         {
             if(HANDLE_OPTION(argv[INDEX]) < 0) { return -1; }
         }
+    }
 
-        else { break; }
+    switch (OPTION_FLAG)
+    {
+        case STD_DISPLAY_TEXT:
+            DISPLAY_HELP(argv[0]);
+            return 0;
+    
+    default:
+        break;
     }
 
     return 0;

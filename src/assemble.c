@@ -11,11 +11,22 @@
 
 #undef USE_DISASM
 
+//=================================================
+//              STATIC DECLARATIVES
+//=================================================
+
 static OPTIONS* OPTION_BASE;
 static MNEOMONIC* MNEOMONIC_BASE;
 
 static int OPTION_FLAG = OPTION_NONE;
 static int TARGET_CPU = FLAG_68000;
+
+static OUTPUT* OUTPUT_API;
+
+static U8 OUTPUT_BUFFER[MAX_OUTPUT_BUFFER];
+static U32 BUFFERED_ADDR = 0;
+static unsigned int BUFFERED_OUTPUT = 0;
+static FILE* OUTPUT_FILE = NULL;
 
 //=================================================
 //          OPCODE AND OPTION HANDLERS
@@ -54,9 +65,17 @@ OPTIONS OPTION[] =
 //            OUTPUT API AND HANDLERS
 //=================================================
 
+// THE INTIAL OUTPUT SCHEMA 
+
 char* INIT_OUTPUT(char* SOURCE)
 {
-    
+    char* SUFFIX = 0;
+
+    if((SUFFIX == NULL) || (OPTION_FLAG & STD_DISPLAY_OUT))
+    {
+
+    }
+
 }
 
 //=================================================

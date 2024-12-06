@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 {
     FILE* SOURCE;
     int FILE;
+    char* MESSAGE;
 
     if((FILE = PARSE_ARGS(argc, argv)) <= 0) return(-FILE);
 
@@ -24,6 +25,18 @@ int main(int argc, char* argv[])
     {
         fprintf(stderr, "Unable to open file '%s'\n", argv[FILE]);
         return EXIT_FAILURE;
+    }
+
+    if((MESSAGE = INIT_OUTPUT(argv[FILE])))
+    {
+        fprintf(stderr, "Initialisation of Output failed: %s\n", MESSAGE);
+        return -2;
+    }
+
+    else
+    {
+        rewind(SOURCE);
+        END_OUTPUT();
     }
 
 }

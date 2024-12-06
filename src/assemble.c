@@ -84,13 +84,23 @@ int PARSE_ARGS(int argc, char** argv)
 
     switch (OPTION_FLAG)
     {
-        case STD_DISPLAY_TEXT:
+        case STD_DISPLAY_HELP:
             DISPLAY_HELP(argv[0]);
             return 0;
+
+        case STD_DISPLAY_NA:
+            printf("Output format required\n");
+            return -1;
     
-    default:
-        break;
+        default:
+            if(!OPTION_FLAG)
+            {
+                printf("Default CPU type set to 68000\n");
+                OPTION_FLAG |= OPTION_68000;
+            }
+
+            break;
     }
 
-    return 0;
+    return (INDEX >= argc) ? 0 : INDEX;
 }

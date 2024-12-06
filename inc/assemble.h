@@ -44,6 +44,16 @@
 #define         FLAG_68030                  00030
 #define         FLAG_68040                  00040
 
+#define         OPTION_68000                1
+#define         OPTION_68010                2
+#define         OPTION_68020                3
+#define         OPTION_68030                4
+#define         OPTION_68040                5
+#define         OPTION_NONE                 0
+
+STATIC 
+int OPTION_FLAG = OPTION_NONE;
+
 //=================================================
 //=================================================
 

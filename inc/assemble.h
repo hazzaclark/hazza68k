@@ -1,4 +1,4 @@
-/* COPYRIGHT (C) HARRY CLARK 2023 */
+/* COPYRIGHT (C) HARRY CLARK 2024 */
 
 /* MOTOROLA 68000 ASSEMBLER */
 
@@ -35,8 +35,17 @@
 #define         PARAM_TOTAL                   1
 #define         PARAM_SUFFIX                  ''
 
-#define PRINT_SEMANTIC(STATE, COMMENT, ADDRESS) fprintf(stderr, COMMENT)
-#define PRINT_INTERNAL(STATE) fputs(stderr, " ", STATE)
+#define         PRINT_SEMANTIC(STATE, COMMENT, ADDRESS) fprintf(stderr, COMMENT)
+#define         PRINT_INTERNAL(STATE) fputs(stderr, " ", STATE)
+
+#define         FLAG_68000                  00000
+#define         FLAG_68010                  00010
+#define         FLAG_68020                  00020
+#define         FLAG_68030                  00030
+#define         FLAG_68040                  00040
+
+//=================================================
+//=================================================
 
 typedef struct OPCODE
 {
@@ -49,22 +58,47 @@ typedef struct OPCODE
 
 typedef struct MNEOMONIC
 {
-    char* NAME;
-    OPCODE* OPCODES;
-    MNEOMONIC* BEFORE;
-    MNEOMONIC* AFTER;
+    char NAME;
+    OPCODE OPCODES;
+    MNEOMONIC BEFORE;
+    MNEOMONIC AFTER;
 
 } MNEOMONIC;
 
 typedef struct OPTIONS
 {
-    char* NAME;
-    char* HELP;
+    char NAME;
+    char HELP;
     int SET;
     int RESET;
 
 } OPTIONS;
 
+//=================================================
+//=================================================
+
+#define         M68K_OPCODE_SIZE        OPCODE_BASE.SIZE
+#define         M68K_OPCODE_NAME        OPCODE_BASE.NAME
+#define         M68K_OPCODE_ARGS        OPCODE_BASE.ARGS
+
+#define         M68K_MNEMONIC_NAME      MNEOMONIC_BASE.NAME
+#define         M68K_MNEMONIC_OPCODES   MNEOMONIC.OPCODES
+
+#define         M68K_OPTION_NAME        OPTIONS.NAME
+#define         M68K_OPTION_HELP        OPTIONS.HELP
+#define         M68K_OPTION_SET         OPTIONS.SET
+#define         M68K_OPTION_RESET       OPTIONS.RESET
+
+//=================================================
+//=================================================
+
+STATIC OPTIONS OPTION[] = 
+{
+    {       "--68000",      "\t\\tTarget M68000 CPU"}
+};
+
+//=================================================
+//=================================================
 
 OPCODE* FIND_OPCODE(char* MATCH, int LEN);
 void INIT_OUTPUT(char* SOURCE);
@@ -74,7 +108,20 @@ void SET_START(U32 ADDRESS);
 void ADD_BYTE(U8 DATA);
 void END_OUTPUT(void);
 
+//=================================================
+//=================================================
+
+OPTIONS* FIND_OPTION(const char* VALUE);
 int PARSE_ARGS(int argc, char** argv);
+int DISPLAY_HELP(const char* NAME);
+int HANDLE_OPTION(const char* ARG);
+
+//=================================================
+//=================================================
+
+static OPCODE OPCODE_BASE;
+static MNEOMONIC MNEOMONIC_BASE;
+static OPTIONS OPTIONS_BASE;
 
 #endif
 #endif

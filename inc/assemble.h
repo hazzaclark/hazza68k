@@ -53,6 +53,10 @@
 
 #define         M68K_OPTION_TARGET      TARGET_CPU
 
+#define         STD_DISPLAY_TEXT                0
+#define         STD_DISPLAY_OUT                 1
+#define         STD_DISPLAY_HELP                2
+
 //=================================================
 //=================================================
 
@@ -99,7 +103,7 @@ void END_OUTPUT(void);
 
 OPTIONS* FIND_OPTION(const char* VALUE);
 int PARSE_ARGS(int argc, char** argv);
-int DISPLAY_HELP(const char* NAME);
+void DISPLAY_HELP(const char* NAME);
 int HANDLE_OPTION(const char* ARG);
 
 #endif

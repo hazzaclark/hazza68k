@@ -73,7 +73,7 @@ typedef struct OPCODE
 
 typedef struct MNEOMONIC
 {
-    char NAME;
+    char* NAME;
     struct OPCODE OPCODES;
     struct MNEOMONIC* BEFORE;
     struct MNEOMONIC* AFTER;
@@ -89,11 +89,22 @@ typedef struct OPTIONS
 
 } OPTIONS;
 
+typedef struct OUTPUT
+{
+    void(*INIT_OUTPUT)(char* SOURCE);
+    void(*NEXT_LINE)(int LINE, char* SOURCE);
+    void(*SET_ADDRESS)(U32 ADDRESS);
+    void(*SET_START)(U32 ADDRESS);
+    void(*ADD_BYTE)(U8 DATA);
+    void(*END_OUTPUT)(void);
+
+} OUTPUT;
+
 //=================================================
 //=================================================
 
 OPCODE* FIND_OPCODE(char* MATCH, int LEN);
-void INIT_OUTPUT(char* SOURCE);
+char* INIT_OUTPUT(char* SOURCE);
 void NEXT_LINE(int LINE, char* SOURCE);
 void SET_ADDRESS(U32 ADDRESS);
 void SET_START(U32 ADDRESS);

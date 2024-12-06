@@ -24,8 +24,7 @@
 #else
 #define USE_ASM
 
-#define         INSTRUCTION_EXEC(VALUE)                  \
-static INSTRUCTION* TYPE ## VALUE(int, char*, char*, int*)
+
 
 #define         DIRECTIVE_CHARS         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789?_"
 #define         LABEL_CHARS             DIRECTIVE_CHARS ".@"
@@ -39,158 +38,23 @@ static INSTRUCTION* TYPE ## VALUE(int, char*, char*, int*)
 #define PRINT_SEMANTIC(STATE, COMMENT, ADDRESS) fprintf(stderr, COMMENT)
 #define PRINT_INTERNAL(STATE) fputs(stderr, " ", STATE)
 
-typedef struct ASSEMBLER
+typedef struct OPCODE
 {
-    U32* GPR;
-    ULONG* PC;
-    FILE* INPUT_FILE;
-    FILE* OUTPUT_FILE;
-    FILE* LISTING_FILE;
-    FILE* SYMBOL_FILE;
-    FILE* ERROR_FILE;
-    U32** LISTING_COUNT;
-    char* FILE_PATH;
-    char IDENTIFIER;
-    ULONG(*LINE_NUMBER);
+    unsigned SIZE;
+    unsigned OPCODE_NAME;
 
-} ASSEMBLER;
+    EA_MODE ARGS;
 
-typedef struct FILE_SEMANTIC
+} OPCODE;
+
+typedef struct MNEOMONIC
 {
-    bool END_OF_FILE;
-    char* MNEMONIC;
-    char* INSTRUCTION_COUNT;
-    char* WRITE_BUFFER;
-    char LINE_BUFFER[1024];
-    char* SOURCE_LINE;
-    struct INSTRUCTION* INSTR_BASE;
-    char LINE_CHAR;
-    UINT* CURRENT_BOOL_EXPR;
-    int FILE_MODE;
+    char* NAME;
+    OPCODE* OPCODES;
+    MNEOMONIC* BEFORE, AFTER;
 
-    UNK* OFFSET_POS;
+} MNEOMONIC;
 
-    UINT CURRENT_IF;
-    UINT FALSE_IF;
-    const char* AFTER_IF;
-
-    union FILE_SYMBOL
-    {
-        char SYMBOL;
-        unsigned TYPE;
-        ULONG* SHARED_VALUE;
-
-    } FILE_SYMBOL;
-
-} FILE_SEMANTIC;
-
-typedef struct LINE_SEMNATIC
-{
-    struct LINE_SEMNATIC* NEXT_LINE;
-    UINT HEAD;
-    UINT TAIL:1;
-    char* SOURCE;
-
-} LINE_SEMNATIC;
-
-typedef enum FILE_MODE
-{
-    MODE_NORMAL,
-    MODE_REPEAT,
-    MODE_MACRO
-    
-} FILE_MODE;
-
-typedef enum SYMBOL_MODE
-{
-    SYMBOL_CONST,
-    SYMBOL_VAR,
-    SYMBOL_MACRO,
-    SYMBOL_LABEL
-
-} SYMBOL_MODE;
-
-typedef struct DIRECTIVES
-{
-    char* KEY;
-    int(*COMPARE_TYPES);
-    UNK* DIRECTIVE_COUNT;
-
-} DIRECTIVES;
-
-typedef struct NODE_ENTRY
-{
-    char* SOURCE_LINE;
-    unsigned VALUE;
-    unsigned TYPE;
-    void* POINTER;
-
-    struct NODE_ENTRY* NEXT;
-    struct NODE_ENTRY* PREV;
-    char* IDENTIFIER;
-    UNK* IDENTIFIER_SIZE; 
-
-} NODE_ENTRY;
-
-typedef struct MACROS
-{
-    char* LINE_POINTER;
-    char* MACRO_CHAR;
-    char* MACRO_PARAM_START;
-    char** MACRO_TOTAL_PARAMS;
-    char* IDENTIFIER;
-
-    UINT* PARAM_COUNT;
-
-
-} MACROS;
-
-typedef struct LOCATION
-{
-    void(*PREV);
-    char* FILE_PATH;
-    ULONG LINE_POS;
-
-} LOCATION;
-
-typedef struct TEXT
-{
-    void(*USER_DATA);
-    void(*READ_CHAR)(void* USER_DATA, int CHAR);
-    void(*READ_LINE)(void* USER_DATA, char* BUFFER, UNK BUFFER_SIZE);
-
-} TEXT;
- 
-void ASSEMBLE_FILE(FILE* INPUT);
-void ASSEMBLE_LINE(FILE_SEMANTIC* FILE_STATE, char* SOURCE);
-void PARSE_LINE(FILE_SEMANTIC* FILE_STATE, char* LINE, char* LABEL, char* POINTER);
-
-void MACRO_TERMINATE(FILE_SEMANTIC* SEMANTIC);
-void MACRO_TERMINATE_WHILE(FILE_SEMANTIC* SEMANTIC);
-unsigned MACRO_BIT_SIZE(unsigned BIT_SIZE);
-void OUT_OF_MEMORY(void);
-
-bool ASSEMBLE_FILE_CALLBACK
-(
-    FILE* INPUT_FILE,
-    FILE* OUTPUT_FILE,
-    FILE* LISTING_FILE,
-    FILE* SYMBOL_FILE,
-    char* INPUT_FILE_PATH
-);
-
-ASM_UNUSED
-static int READ_CHAR(void* USER_DATA)
-{
-    int ARG = fgetc((FILE*)USER_DATA);
-    return ARG == EOF ? -1 : ARG;
-}
-
-ASM_UNUSED
-static char* READ_LINE(void* USER_DATA, char* BUFFER, UNK* BUFFER_SIZE)
-{
-    return fgets(BUFFER, *(int*)BUFFER_SIZE, (FILE*)USER_DATA);
-}
 
 #endif
 #endif

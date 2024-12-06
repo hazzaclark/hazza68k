@@ -51,8 +51,7 @@
 #define         OPTION_68040                5
 #define         OPTION_NONE                 0
 
-STATIC 
-int OPTION_FLAG = OPTION_NONE;
+#define         M68K_OPTION_TARGET      TARGET_CPU
 
 //=================================================
 //=================================================
@@ -69,47 +68,20 @@ typedef struct OPCODE
 typedef struct MNEOMONIC
 {
     char NAME;
-    OPCODE OPCODES;
-    MNEOMONIC BEFORE;
-    MNEOMONIC AFTER;
+    struct OPCODE OPCODES;
+    struct MNEOMONIC* BEFORE;
+    struct MNEOMONIC* AFTER;
 
 } MNEOMONIC;
 
 typedef struct OPTIONS
 {
-    char NAME;
-    char HELP;
+    const char* NAME;
+    const char* HELP;
     int SET;
     int RESET;
 
 } OPTIONS;
-
-//=================================================
-//=================================================
-
-#define         M68K_OPCODE_SIZE        OPCODE_BASE.SIZE
-#define         M68K_OPCODE_NAME        OPCODE_BASE.NAME
-#define         M68K_OPCODE_ARGS        OPCODE_BASE.ARGS
-
-#define         M68K_MNEMONIC_NAME      MNEOMONIC_BASE.NAME
-#define         M68K_MNEMONIC_OPCODES   MNEOMONIC.OPCODES
-
-#define         M68K_OPTION_NAME        OPTIONS_BASE.NAME
-#define         M68K_OPTION_HELP        OPTIONS_BASE.HELP
-#define         M68K_OPTION_SET         OPTIONS_BASE.SET
-#define         M68K_OPTION_RESET       OPTIONS_BASE.RESET
-
-//=================================================
-//=================================================
-
-STATIC OPTIONS OPTION[] = 
-{
-    {       '--68000',      '\t\\tTarget M68000 CPU', FLAG_68000},
-    {       '--68010',      '\t\\tTarget M68010 CPU', FLAG_68010},
-    {       '--68000',      '\t\\tTarget M68020 CPU', FLAG_68020},
-    {       '--68010',      '\t\\tTarget M68030 CPU', FLAG_68030},
-    {       '--stdout',     '\t\\tSend Output to Console', 0}
-};
 
 //=================================================
 //=================================================
@@ -129,13 +101,6 @@ OPTIONS* FIND_OPTION(const char* VALUE);
 int PARSE_ARGS(int argc, char** argv);
 int DISPLAY_HELP(const char* NAME);
 int HANDLE_OPTION(const char* ARG);
-
-//=================================================
-//=================================================
-
-static OPCODE OPCODE_BASE;
-static MNEOMONIC MNEOMONIC_BASE;
-static OPTIONS OPTIONS_BASE;
 
 #endif
 #endif

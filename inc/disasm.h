@@ -38,59 +38,39 @@
 #else
 #define TYPE_ARGS
 
-static const UNK* TYPE;
+extern UNK* TYPE;
 
 #define     CREATE_TYPE(VALUE) \
 static TYPE* ARBITARY_TYPE ## VALUE(TYPE* NODE); \
 
 
-typedef struct INSTRUCTION
-{
-	S32 VALUE;
-	S32 SOURCE;
-	S32 DESTINATION;
-	char* SIZE;
-	char* FLAGS;
-	char NAME[MAX_CHAR];
-	bool PARSE_FLAG;
-	USHORT BYTEMASK;
+#define 		M68K_BOOL_FORMAT		"%d"
+#define			M68K_BYTE_FORMAT		"%02x"	
+#define			M68K_WORD_FORMAT		"%04x"
+#define			M68K_LONG_FORMAT		"%08x"
 
-} INSTRUCTION;
 
-typedef struct EXPRESSION
-{
-    union 
-    {
-        char* EXP_NAME;
-        ULONG* EXP_LENGTH;
-
-    } SUB_EXP;
-
-	union 
-	{
-		void(*HEAD);
-		void(*TAIL);
-		char* IDENTIFIER;
-
-	} NODE;
-
-} EXPRESSION;
-
-typedef struct OPCODE
-{
-
-	size_t* OPCODE_SIZE;
-
-	union 
-	{
-		U32 MAIN_REGISTER;
-		U32 INDEX_REGISTER;
-		size_t* OPERAND_SIZE;
-		bool* IR_TO_AR;
-
-	} OPERAND;
-	
-} OPCODE;
+#define 		PERIOD        '.'
+#define 		PLUS        '+'
+#define 		MINUS        '-'
+#define 		OPAREN        '('
+#define 		CPAREN        ')'
+#define 		COMMA        ','
+#define 		DOLLAR        '$'
+#define 		PERCENT        '%'
+#define 		HASH        '#'
+#define 		COLON        ':'
+#define 		SEMICOLON    ';'
+#define 		ASTERIX        '*'
+#define 		SLASH        '/'
+#define 		UNDERSCORE    '_'
+#define 		QUOTE        '\''
+#define 		QUOTES        '"'
+#define 		ESCAPE        '\\'
+#define 		AMPERSAND    '&'
+#define 		PIPE        '|'
+#define 		HAT        '^'
+#define 		BANG        '!'
 
 typedef enum CONDITION
 {

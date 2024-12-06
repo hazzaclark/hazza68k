@@ -13,9 +13,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(void)
+int main(int argc, char* argv[])
 {
-    printf("HARRY CLARK - MOTOROLA 68000 ASSEMBLER\n");
+    FILE* SOURCE;
+    int FILE;
 
-    return 0;
+    if((FILE = PARSE_ARGS(argc, argv)) <= 0) return(-FILE);
+
+    if((SOURCE = fopen(argv[FILE], "r")) == NULL)
+    {
+        fprintf(stderr, "Unable to open file '%s'\n", argv[FILE]);
+        return EXIT_FAILURE;
+    }
+
 }

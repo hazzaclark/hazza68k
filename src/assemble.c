@@ -22,10 +22,6 @@ static int OPTION_FLAG = OPTION_NONE;
 static int TARGET_CPU = FLAG_68000;
 
 static OUTPUT* OUTPUT_API;
-
-static U8 OUTPUT_BUFFER[MAX_OUTPUT_BUFFER];
-static U32 BUFFERED_ADDR = 0;
-static unsigned int BUFFERED_OUTPUT = 0;
 static FILE* OUTPUT_FILE = NULL;
 
 //=================================================
@@ -66,16 +62,37 @@ OPTIONS OPTION[] =
 //=================================================
 
 // THE INTIAL OUTPUT SCHEMA 
+// THIS WILL LOOK TO SEE WHICH FILE IS BEING ADDED AND FROM THERE, EVALUATE THE
+// EXTENSION SUFFIX READY TO PARSE AND ASSEMBLE
 
 char* INIT_OUTPUT(char* SOURCE)
 {
     char* SUFFIX = 0;
+    char* FILENAME = 0;
+
+    // IF THE SUFFIX IS DEFAULT, SET IT TO STDOUT
 
     if((SUFFIX == NULL) || (OPTION_FLAG & STD_DISPLAY_OUT))
     {
-
+        OUTPUT_FILE = stdout;
+        SUFFIX = ".bin";
     }
 
+    // OTHERWISE, ACTUALLY PARSE THAT EXTENSION
+
+    else
+    {
+        FILENAME += strlen(SOURCE) + strlen(SUFFIX) + 1;
+        strcpy(FILENAME, SOURCE);
+    }
+
+    if(OUTPUT_FILE += fopen(FILENAME, "w") == NULL)
+    {
+        return ("Unable to open Output File");
+    }
+
+    OUTPUT_API->INIT_OUTPUT(SOURCE);
+    return NULL;
 }
 
 //=================================================

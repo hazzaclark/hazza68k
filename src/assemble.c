@@ -11,14 +11,29 @@
 
 #undef USE_DISASM
 
+static OPTIONS* OPTION_BASE;
+
+static int OPTION_FLAG = OPTION_NONE;
+static int TARGET_CPU = FLAG_68000;
+
+OPTIONS OPTION[] = 
+{
+    { "--68000", "\t\tTarget M68000 CPU", FLAG_68000, 0 },
+    { "--68010", "\t\tTarget M68010 CPU", FLAG_68010, 0 },
+    { "--68020", "\t\tTarget M68020 CPU", FLAG_68020, 0 },
+    { "--68030", "\t\tTarget M68030 CPU", FLAG_68030, 0 },
+    { "--stdout", "\t\tSend Output to Console", 0, 0 }
+};
+
+
 // FIND THE PROVIDED OPTIONS BASED ON THE NAME LIST
 // CONCATENATE THE OPTION BASED ON THE PROVIDED USER INPUT
 
 OPTIONS* FIND_OPTION(const char* VALUE)
 {
-    for(OPTIONS* O = OPTION; M68K_OPTION_NAME; O++)
+    for(OPTIONS* O = OPTION; OPTION_BASE->NAME; O++)
     {
-        if(strcmp(VALUE, M68K_OPTION_NAME) == 0) return O;
+        if(strcmp(VALUE, OPTION_BASE->NAME) == 0) return O;
     }
 
     return NULL;
@@ -29,15 +44,15 @@ OPTIONS* FIND_OPTION(const char* VALUE)
 
 int HANDLE_OPTION(const char* ARG)
 {
-    OPTIONS* OPTION = FIND_OPTION(ARG);
+    OPTIONS* OPTION_TYPE = FIND_OPTION(ARG);
 
-    if(!OPTION)
+    if(!OPTION_TYPE)
     {
         fprintf(stderr, "Unrecognised Option '%s\n", ARG);
         return EXIT_FAILURE;
     }
 
-    OPTION_FLAG = (OPTION_FLAG & M68K_OPTION_RESET) | M68K_OPTION_SET;
+    OPTION_FLAG = (OPTION_FLAG & OPTION_BASE->RESET) | OPTION_BASE->SET;
     TARGET_CPU |= M68K_OPTION_TARGET;
 
     return 0;
@@ -47,7 +62,6 @@ int HANDLE_OPTION(const char* ARG)
 int PARSE_ARGS(int argc, char** argv)
 {
     int INDEX = 0;
-    OPTIONS* OPTION;
 
     for(INDEX = 1; INDEX < argc; INDEX++)
     {
@@ -58,4 +72,6 @@ int PARSE_ARGS(int argc, char** argv)
 
         else { break; }
     }
+
+    return 0;
 }

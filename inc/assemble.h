@@ -57,6 +57,8 @@
 #define         STD_DISPLAY_OUT                 1
 #define         STD_DISPLAY_HELP                2
 
+#define         STD_DISPLAY_NA                  -1
+
 //=================================================
 //=================================================
 

@@ -15,7 +15,6 @@
 
 /* SYSTEM INCLUDES */
 
-#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -24,7 +23,7 @@
 #else
 #define USE_ASM
 
-
+#define         MAX_OUTPUT_BUFFER       16
 
 #define         DIRECTIVE_CHARS         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789?_"
 #define         LABEL_CHARS             DIRECTIVE_CHARS ".@"
@@ -116,7 +115,7 @@ void END_OUTPUT(void);
 
 OPTIONS* FIND_OPTION(const char* VALUE);
 int PARSE_ARGS(int argc, char** argv);
-void DISPLAY_HELP(const char* NAME);
+void DISPLAY_HELP(const char* MESSAGE);
 int HANDLE_OPTION(const char* ARG);
 
 #endif

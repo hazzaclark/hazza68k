@@ -53,6 +53,7 @@ OPTIONS OPTION[] =
     { "--68010", "\t\tTarget M68010 CPU", FLAG_68010, 0 },
     { "--68020", "\t\tTarget M68020 CPU", FLAG_68020, 0 },
     { "--68030", "\t\tTarget M68030 CPU", FLAG_68030, 0 },
+    { "--68040", "\t\tTarget M68040 CPU", FLAG_68040, 0 },
     { "--stdout", "\tSend Output to Console", 0, 0 }
 };
 

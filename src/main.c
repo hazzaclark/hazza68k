@@ -19,6 +19,11 @@ int main(int argc, char* argv[])
     int FILE;
     char* MESSAGE;
 
+    if(argc < 2)
+    {
+        DISPLAY_HELP(argv[0]);
+    }
+
     if((FILE = PARSE_ARGS(argc, argv)) <= 0) return(-FILE);
 
     if((SOURCE = fopen(argv[FILE], "r")) == NULL)
@@ -30,13 +35,13 @@ int main(int argc, char* argv[])
     if((MESSAGE = INIT_OUTPUT(argv[FILE])))
     {
         fprintf(stderr, "Initialisation of Output failed: %s\n", MESSAGE);
+        fclose(SOURCE);
         return -2;
     }
 
-    else
-    {
-        rewind(SOURCE);
-        END_OUTPUT();
-    }
+    rewind(SOURCE);
+    fclose(SOURCE);
+    END_OUTPUT();
 
+    return 0;
 }

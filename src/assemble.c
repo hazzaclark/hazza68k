@@ -15,13 +15,13 @@
 //              STATIC DECLARATIVES
 //=================================================
 
-static OPTIONS* OPTION_BASE;
-static MNEOMONIC* MNEOMONIC_BASE;
+static OPTIONS* OPTION_BASE = NULL;
+static MNEOMONIC* MNEOMONIC_BASE = NULL;
 
 static int OPTION_FLAG = OPTION_NONE;
 static int TARGET_CPU = FLAG_68000;
 
-static OUTPUT* OUTPUT_API;
+static OUTPUT* OUTPUT_API = NULL;
 static FILE* OUTPUT_FILE = NULL;
 
 //=================================================
@@ -53,7 +53,7 @@ OPTIONS OPTION[] =
     { "--68010", "\t\tTarget M68010 CPU", FLAG_68010, 0 },
     { "--68020", "\t\tTarget M68020 CPU", FLAG_68020, 0 },
     { "--68030", "\t\tTarget M68030 CPU", FLAG_68030, 0 },
-    { "--stdout", "\t\tSend Output to Console", 0, 0 }
+    { "--stdout", "\tSend Output to Console", 0, 0 }
 };
 
 //=================================================
@@ -81,8 +81,9 @@ char* INIT_OUTPUT(char* SOURCE)
 
     else
     {
-        FILENAME += strlen(SOURCE) + strlen(SUFFIX) + 1;
+        FILENAME = malloc(strlen(SOURCE) + strlen(SUFFIX) + 1);
         strcpy(FILENAME, SOURCE);
+        strcpy(FILENAME, SUFFIX);
     }
 
     if(OUTPUT_FILE += fopen(FILENAME, "w") == NULL)
@@ -103,7 +104,7 @@ char* INIT_OUTPUT(char* SOURCE)
 
 OPTIONS* FIND_OPTION(const char* VALUE)
 {
-    for(OPTIONS* O = OPTION; OPTION_BASE->NAME; O++)
+    for(OPTIONS* O = OPTION; O->NAME != NULL; O++)
     {
         if(strcmp(VALUE, OPTION_BASE->NAME) == 0) return O;
     }
@@ -131,11 +132,11 @@ int HANDLE_OPTION(const char* ARG)
     
 }
 
-void DISPLAY_HELP(const char* NAME)
+void DISPLAY_HELP(const char* MESSAGE)
 {
-    printf("Usage: %s {options} {filename}\n Options:-\n", NAME);
+    printf("Usage: %s {options} {filename}\n Options:-\n", MESSAGE);
 
-    for(OPTIONS* O = OPTION; OPTION_BASE->NAME; O++)
+    for(OPTIONS* O = OPTION; O->NAME; O++)
     {
         printf("\t%s%s\n", O->NAME, O->HELP);
     }
@@ -144,7 +145,6 @@ void DISPLAY_HELP(const char* NAME)
 int PARSE_ARGS(int argc, char** argv)
 {
     int INDEX = 0;
-    int OPTION_FLAG = 0;
 
     for(INDEX = 1; INDEX < argc; INDEX++)
     {
@@ -152,26 +152,6 @@ int PARSE_ARGS(int argc, char** argv)
         {
             if(HANDLE_OPTION(argv[INDEX]) < 0) { return -1; }
         }
-    }
-
-    switch (OPTION_FLAG)
-    {
-        case STD_DISPLAY_HELP:
-            DISPLAY_HELP(argv[0]);
-            return 0;
-
-        case STD_DISPLAY_NA:
-            printf("Output format required\n");
-            return -1;
-    
-        default:
-            if(!OPTION_FLAG)
-            {
-                printf("Default CPU type set to 68000\n");
-                OPTION_FLAG |= OPTION_68000;
-            }
-
-            break;
     }
 
     return (INDEX >= argc) ? 0 : INDEX;

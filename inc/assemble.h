@@ -15,6 +15,7 @@
 
 /* SYSTEM INCLUDES */
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -99,6 +100,17 @@ typedef struct OUTPUT
 
 } OUTPUT;
 
+typedef struct IDENTIFIER
+{
+    char* NAME;
+    bool DEFINED;
+    U16 VALUE;
+
+    struct IDENTIFIER* BEFORE;
+    struct IDENTIFIER* AFTER;
+
+} IDENTIFIER;
+
 //=================================================
 //=================================================
 
@@ -117,6 +129,8 @@ OPTIONS* FIND_OPTION(const char* VALUE);
 int PARSE_ARGS(int argc, char** argv);
 void DISPLAY_HELP(const char* MESSAGE);
 int HANDLE_OPTION(const char* ARG);
+
+IDENTIFIER* LOCATE_IDEN(char* VALUE);
 
 #endif
 #endif

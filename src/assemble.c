@@ -17,12 +17,10 @@
 
 static OPTIONS* OPTION_BASE = NULL;
 static MNEOMONIC* MNEOMONIC_BASE = NULL;
-
-static int OPTION_FLAG = OPTION_NONE;
 static int TARGET_CPU = FLAG_68000;
-
-static OUTPUT* OUTPUT_API = NULL;
+static OUTPUT* OUTPUT_API;
 static FILE* OUTPUT_FILE = NULL;
+static int OPTION_FLAG = OPTION_NONE;
 
 //=================================================
 //          OPCODE AND OPTION HANDLERS
@@ -95,6 +93,11 @@ char* INIT_OUTPUT(char* SOURCE)
     OUTPUT_API->INIT_OUTPUT(SOURCE);
     return NULL;
 }
+
+// PROCESS THE INPUT FILE PROVIDED
+// TAKES AN INPUT LINE OF THE ASSEMBLY, BREAKS IT DOWN, IDENTIFIES THE CORRESPONDING
+// INPUTS FOR THE SECTION AND HANDLES ACCORDINGLY
+
 
 //=================================================
 //          MISC. FUNCTIONS AND HANDLERS

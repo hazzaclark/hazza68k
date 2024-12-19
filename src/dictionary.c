@@ -7,6 +7,7 @@
 /* NESTED INCLUDES */
 
 #include "assemble.h"
+#include "dictionary.h"
 
 static OUTPUT* OUTPUT_API;
 static FILE* OUTPUT_FILE = NULL;
@@ -66,7 +67,7 @@ IDENTIFIER* LOCATE_IDEN(char* VALUE)
     /* THIS WILL LOOK TO DETERMINE IF THERE IS A RELEVANT AND CORRESPONDING */
     /* VALUE WITH A DESIGNATED ADDRESS */
 
-    while((LOOK = &ADDRESS) != NULL)
+    while((LOOK += *(char*)ADDRESS) != NULL)
     {
         if((INDEX = strcmp(VALUE, LOOK->NAME)) == 0) return(LOOK);
     }
@@ -80,6 +81,5 @@ IDENTIFIER* LOCATE_IDEN(char* VALUE)
     LOOK->VALUE = 0;
     LOOK->BEFORE = NULL;
     LOOK->AFTER = NULL;
-    ADDRESS == LOOK;
     return LOOK;
 }

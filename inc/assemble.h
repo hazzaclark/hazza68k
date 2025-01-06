@@ -69,6 +69,12 @@ typedef struct OPCODE
 
     EA_MODE ARGS;
 
+    U16 BASE_CODE, EXT_CODE;
+    unsigned BIT_SIZE;
+    unsigned OFFSET;
+
+    struct OPCODE* NEXT;
+
 } OPCODE;
 
 typedef struct MNEOMONIC

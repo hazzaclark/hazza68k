@@ -37,11 +37,6 @@ OPCODE* FIND_OPCODE(char* MATCH, int LEN)
     return NULL;
 }
 
-char* PROC_INPUT(int LINE, char* BUFFER)
-{
-
-}
-
 int PASS_FILE(FILE* SOURCE)
 {
     char BUFFER[MAX_BIT_ARGS];

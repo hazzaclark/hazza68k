@@ -11,9 +11,9 @@
 
 #undef USE_DISASM
 
-//=================================================
-//              STATIC DECLARATIVES
-//=================================================
+/*=================================================
+              STATIC DECLARATIVES
+=================================================*/
 
 static OPTIONS* OPTION_BASE = NULL;
 static MNEOMONIC* MNEOMONIC_BASE = NULL;
@@ -22,9 +22,9 @@ static OUTPUT* OUTPUT_API;
 static FILE* OUTPUT_FILE = NULL;
 static int OPTION_FLAG = OPTION_NONE;
 
-//=================================================
-//          OPCODE AND OPTION HANDLERS
-//=================================================
+/*=================================================
+          OPCODE AND OPTION HANDLERS
+=================================================*/
 
 // FIND AND PARSE THE DESIGNATED OPCODES PROVIDED THROUGH THE SOURCE FILE
 // THIS CAN BE DONE USING THE MNEMONIC STRUCT TO LOOK FOR THE SPECIFIC KEY VALUE
@@ -55,9 +55,9 @@ OPTIONS OPTION[] =
     { "--stdout", "\tSend Output to Console", 0, 0 }
 };
 
-//=================================================
-//            OUTPUT API AND HANDLERS
-//=================================================
+/*=================================================
+            OUTPUT API AND HANDLERS
+=================================================*/
 
 // THE INTIAL OUTPUT SCHEMA 
 // THIS WILL LOOK TO SEE WHICH FILE IS BEING ADDED AND FROM THERE, EVALUATE THE
@@ -94,14 +94,14 @@ char* INIT_OUTPUT(char* SOURCE)
     return NULL;
 }
 
-// PROCESS THE INPUT FILE PROVIDED
-// TAKES AN INPUT LINE OF THE ASSEMBLY, BREAKS IT DOWN, IDENTIFIES THE CORRESPONDING
-// INPUTS FOR THE SECTION AND HANDLES ACCORDINGLY
+/* PROCESS THE INPUT FILE PROVIDED
+TAKES AN INPUT LINE OF THE ASSEMBLY, BREAKS IT DOWN, IDENTIFIES THE CORRESPONDING
+INPUTS FOR THE SECTION AND HANDLES ACCORDINGLY */
 
 
-//=================================================
-//          MISC. FUNCTIONS AND HANDLERS
-//=================================================
+/*=================================================
+          MISC. FUNCTIONS AND HANDLERS
+=================================================*/
 
 // FIND THE PROVIDED OPTIONS BASED ON THE NAME LIST
 // CONCATENATE THE OPTION BASED ON THE PROVIDED USER INPUT

@@ -5,9 +5,6 @@ My memory efficient Motorola 68000 Assembler
 
 This project serves to prove an ease-of-use, memory efficient Assembler designed specifically for Motorola 68000 Assembly.
 
-The ease-of-use will take affect through the surrogate means of using the Command Line to build the Assembler as well
-as Assemble your Code - as it will automate the process governed by Makefiles and the such
-
 # Usage:
 
 ``git clone https://github.com/hazzaclark/hazza68k.git``

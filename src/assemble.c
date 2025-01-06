@@ -37,3 +37,28 @@ OPCODE* FIND_OPCODE(char* MATCH, int LEN)
     return NULL;
 }
 
+char* PROC_INPUT(int LINE, char* BUFFER)
+{
+
+}
+
+int PASS_FILE(FILE* SOURCE)
+{
+    char BUFFER[MAX_BIT_ARGS];
+    char* MESSAGE;
+
+    int LINE, ERROR = 0;
+
+    /* ASSUME THERE IS A CURRENT FILE BEING PASSED THROUGH */
+    /* EVALUATE LENGTH FROM THE START TO THE END */
+
+    while(fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
+    {
+        BUFFER[strlen(BUFFER) - 1] = EOF;
+        LINE++;
+
+        /* CHECK THROUGH EACH CORRESPONDING LINE */
+
+        NEXT_LINE(LINE, BUFFER);
+    }
+}

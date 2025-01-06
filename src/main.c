@@ -6,6 +6,7 @@
 
 /* NESTED INCLUDES */
 
+#include "68KSTD.h"
 #include "assemble.h"
 
 /* SYSTEM INCLUDES */

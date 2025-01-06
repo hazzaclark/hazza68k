@@ -10,11 +10,11 @@ as Assemble your Code - as it will automate the process governed by Makefiles an
 
 # Usage:
 
-``git clone https://github.com/hazzaaclark/68K_ASM.git``
+``git clone https://github.com/hazzaclark/hazza68k.git``
 
-``cd 68K_ASM``
+``cd hazza68k``
 
-``sudo make``
+``make clean``
 
 # Notes:
 

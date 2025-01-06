@@ -55,4 +55,6 @@ int PASS_FILE(FILE* SOURCE)
 
         NEXT_LINE(LINE, BUFFER);
     }
+
+    return 0;
 }

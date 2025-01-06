@@ -2,48 +2,43 @@
 ## MOTOROLA 68000 ASSEMBLER
 
 #########################################################################
-##				PREFIXES			       ##
+##                              PREFIXES                               ##
 #########################################################################
 
-CC 				=		$(PREFIX)gcc
-AR				=		$(PREFIX)ar
-WARNINGS		=		-std=c90 -Wall -Wextra -Wparentheses -Werror -pedantic
-SRC				= 		src
-INC				=		inc
+CC              =       $(PREFIX)gcc
+WARNINGS        =       -std=c99 -Wall -Wextra -Wparentheses -Werror -pedantic
+SRC             =       src
+INC             =       inc
 
 #########################################################################
-##				FILE ACCESS			       ##
+##                           FILE ACCESS                               ##
 #########################################################################
 
-68K_FILES	=		$(wildcard $(SRC)/*.c)
-68K_OBJS	=		$(68K_FILES:$(SRC)/%.c=$(SRC)/%.o)
+68K_FILES       =       $(wildcard $(SRC)/*.c)
+68K_OBJS        =       $(68K_FILES:$(SRC)/%.c=$(SRC)/%.o)
 
 #########################################################################
-##			    TARGET LINKING			       ##
+##                        TARGET LINKING                               ##
 #########################################################################
 
 ## ADJUST THE FILE EXTENSION TO SUIT WHICHEVER FILE EXT YOU NEED
 ## CONSULT THE README FOR DIRECTIONS
 
-TARGET 		=		hazza68k
+TARGET          =       hazza68k
 
 all: $(TARGET)
 
 $(TARGET): $(68K_OBJS)
-	$(AR) rcs $@ $^
+	$(CC) $(WARNINGS) -I$(INC) -o $@ $^
 
 $(SRC)/%.o: $(SRC)/%.c
 	$(CC) $(WARNINGS) -I$(INC) -c $< -o $@
 
 #########################################################################
-##				CLEANUP 			       ##
+##                              CLEANUP                                ##
 #########################################################################
 
 clean:
 	rm -f $(SRC)/*.o $(TARGET)
 
 .PHONY: clean
-
-#########################################################################
-##				MISC.				       ##
-#########################################################################

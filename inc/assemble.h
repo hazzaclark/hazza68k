@@ -80,7 +80,7 @@ typedef struct OPCODE
 typedef struct MNEOMONIC
 {
     char* NAME;
-    struct OPCODE OPCODES;
+    struct OPCODE* OPCODES;
     struct MNEOMONIC* BEFORE;
     struct MNEOMONIC* AFTER;
 
@@ -106,25 +106,35 @@ typedef struct OUTPUT
 
 } OUTPUT;
 
+typedef struct DIRECTIVE_SYM
+{
+    DIRECTIVES ID;
+    char* TEXT;
+    int LENGTH;
+
+    S16 REG_NUM;
+    unsigned CONTAINS;
+    unsigned VALUE;
+
+    OPCODE* OP;
+    char* ERROR;
+    struct DIRECTIVE_SYM* EXPR;
+    struct DIRECTIVE_SYM* NEXT;
+
+} DIRECTIVE_SYM;
+
 //=================================================
 //=================================================
 
 OPCODE* FIND_OPCODE(char* MATCH, int LEN);
-char* INIT_OUTPUT(char* SOURCE);
+int PASS_FILE(FILE* SOURCE);
+char* PROC_INPUT(int LINE, char* BUFFER);
+
 void NEXT_LINE(int LINE, char* SOURCE);
 void SET_ADDRESS(U32 ADDRESS);
 void SET_START(U32 ADDRESS);
 void ADD_BYTE(U8 DATA);
 void END_OUTPUT(void);
-
-//=================================================
-//=================================================
-
-OPTIONS* FIND_OPTION(const char* VALUE);
-int PARSE_ARGS(int argc, char** argv);
-void DISPLAY_HELP(const char* MESSAGE);
-int HANDLE_OPTION(const char* ARG);
-
 
 #endif
 #endif

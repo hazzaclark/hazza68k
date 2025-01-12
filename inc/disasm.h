@@ -288,6 +288,54 @@ typedef enum EA_MODE
 	
 } EA_MODE;
 
+typedef enum DIRECTIVES
+{
+	NONE = 0,
+	ERROR,
+	IDENTIFIER,
+	OPCODE,
+	ADDRESS_REG,
+	DATA_REG, 
+	FPU_REG,
+	REG_LIST,
+	NUMBER,
+	REAL_FPNUM,
+	CHAR,
+	STRING,
+	EXP,
+
+	PC,
+	SR,
+	CCR,
+	USP,
+	VBR,
+	SFC,
+	DFC,
+
+	BYTE,
+	WORD,
+	LONG,
+	TEXT,
+	DATA,
+	BSS,
+	ORG,
+	START,
+	ALIGN,
+	EQU,
+	END,
+	DC, DS,
+
+	MUL,
+	DIV,
+	MOD,
+	AND,
+	OR,
+	EOR,
+	NOT,
+	ADDRESS
+
+} DIRECTIVES;
+
 #endif
 #endif
 #endif

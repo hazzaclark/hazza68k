@@ -136,9 +136,20 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
         case PERIOD:
             if(((INDEX = FIND_IDENTIFIER(STRING + 1)) > 0 && FIND_KEYWORD(KEYWORD_BIT, STRING + 1, INDEX)) != NONE)
             {
-                
+                SYM->TEXT = STRING;
+                SYM->LENGTH = INDEX + 1;
             }
-            break;
+
+            else
+            {
+                SYM->ID = ERROR;
+                SYM->TEXT = STRING;
+                SYM->LENGTH = INDEX + 1;
+                SYM->ERROR = "Unrecognised Keyword";
+                *PTR = STRING = SYM->LENGTH;
+            }
+
+            return true;
     
         default:
             break;

@@ -26,21 +26,21 @@ static KEYWORD KEYWORDS[] =
     { "text",           TEXT        },
     { "data",           DATA        },
     { "bss",            BSS         },
-	{ "org",		    ORG			},
-	{ "start",		    START		},
-	{ "align",		    ALIGN		},
-	{ "equ",		    EQU			},
-	{ "end",		    END			},
-	{ "dc",			    DC			},
-	{ "ds",			    DS			},
+	{ "org",            ORG         },
+	{ "start",          START       },
+	{ "align",          ALIGN       },
+	{ "equ",            EQU         },
+	{ "end",            END         },
+	{ "dc",             DC          },
+	{ "ds",             DS          },
 
-	{ "pc",			    PC			},
-	{ "sr",			    SR			},
-	{ "ccr",		    CCR			},
-	{ "usp",		    USP			},
-	{ "vbr",		    VBR			},
-	{ "sfc",		    SFC			},
-	{ "dfc",		    DFC			},
+	{ "pc",             PC          },
+	{ "sr",             SR          },
+	{ "ccr",            CCR         },
+	{ "usp",            USP         },
+	{ "vbr",            VBR         },
+	{ "sfc",            SFC         },
+	{ "dfc",            DFC         },
 	{ NULL }
 };
 
@@ -125,5 +125,31 @@ int FIND_IDENTIFIER(char* LOOK)
 
 DIRECTIVES FIND_KEYWORD(KEYWORD* KEY, char* FIND, int INDEX)
 {
+    while(KEY->NAME != NULL)
+    {
+        if(COMPARE_WORD(FIND, INDEX, KEY->NAME) == 0)
+        {
+            return(KEY->ID);
+        }
 
+        KEY++;
+    }
+
+    return(NONE);
+}
+
+// THIS WILL ACT AS THE TOUPPER PARSER TO PROVIDE FOR THE CIRCUMSTANCE
+// BY WHICH OPERANDS, SYMMBOLS AND WHAT HAVE YOU, ARE CAPITALISED AND 
+// ARE NEEDED TO BE PARSED ACCORDINGLY
+
+int COMPARE_WORD(char* CHECK, int LEN, char* FIXED)
+{
+    int CHECKER, WORD;
+
+    while(LEN--)
+    {
+        if((CHECKER = toupper(*CHECK++)) != (WORD = toupper(*FIXED++))) return(CHECKER - WORD);
+    }
+
+    return (*FIXED);
 }

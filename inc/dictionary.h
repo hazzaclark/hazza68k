@@ -47,5 +47,7 @@ char* PROCESS_DIRECTIVE(int* INPUT);
 char* PROCESS_INSTRUCTION(int* INPUT);
 char* PROCESS_INPUT(int LINE, char* BUFFER);
 
+int FIND_IDENTIFIER(char* LOOK);
+
 #endif
 #endif 

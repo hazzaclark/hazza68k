@@ -8,10 +8,42 @@
 /* NESTED INCLUDES */
 
 #include "assemble.h"
+#include "dictionary.h"
 
 #undef USE_DISASM
 
 static MNEOMONIC* MNEOMONIC_BASE = NULL;
+
+static KEYWORD KEYWORD_BIT[] = 
+{
+    { "b",              BYTE        },
+    { "w",              WORD        },
+    { "l",              LONG        },
+    { NULL }
+};
+
+static KEYWORD KEYWORDS[] = 
+{
+    { "text",           TEXT        },
+    { "data",           DATA        },
+    { "bss",            BSS         },
+	{ "org",            ORG         },
+	{ "start",          START       },
+	{ "align",          ALIGN       },
+	{ "equ",            EQU         },
+	{ "end",            END         },
+	{ "dc",             DC          },
+	{ "ds",             DS          },
+
+	{ "pc",             PC          },
+	{ "sr",             SR          },
+	{ "ccr",            CCR         },
+	{ "usp",            USP         },
+	{ "vbr",            VBR         },
+	{ "sfc",            SFC         },
+	{ "dfc",            DFC         },
+	{ NULL }
+};
 
 /*=================================================
           OPCODE AND OPTION HANDLERS
@@ -57,4 +89,58 @@ int PASS_FILE(FILE* SOURCE)
     }
 
     return 0;
+}
+
+/* PROCESS THE INPUT PROVIDED FROM THE INPUT LINE */
+/* THE FOLLOWING WILL BREAK DOWN THE CORRESPONDENCE INTO SMALLER SECTIONS */
+/* IN ORDER TO PARSE EXPRESSIONS AND CALLS THE RELEVANT ROUTINE TO HANDLE SAID INPUT */
+
+char* PROC_INPUT(int LINE, char* BUFFER)
+{   
+    DIRECTIVE_SYM* HEAD, **TAIL, *SYM, *TOP;
+    int LEN = 0;
+
+    TAIL = &HEAD;
+    SYM = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
+    
+}
+
+/* FIND THE NEXT AVAILABLE SYMBOL BASED OFF OF THE POINTER REFERENCE */
+/* ADDS TO THE SYMBOL RECORD TO VALIDATE WHICH SYMBOLS ARE BEING PASSED THROUGH */
+/* FROM THE SOURCE FILE */
+
+int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
+{
+    char* STRING;
+    DIRECTIVES SYM_INDEX;
+
+    int INDEX = 0;
+
+    // INIT SETUP FOR SYMBOL LOOKUP
+    memset(SYM, 0, sizeof(DIRECTIVE_SYM));
+    STRING = *PTR;
+
+    // DETERMINE THE END OF A STRING LITERAL OR EOF
+
+    while(isspace(*STRING)) STRING++; 
+
+    // IS THE POINTER AT THE END OF THE STRING?
+
+    if(*STRING == PARAM_EOS) { *PTR = STRING; } return false;
+
+    // NOW PARSE EACH OF THE CORRESPONDING CHAR DIRECTIVES THAT COULD BE FOUND WITHIN THE SOURCE FILE
+    // THIS RANGES FROM ANY AND ALL SORTS OF ASCII LEXICALS
+
+    switch (*STRING)
+    {
+        case PERIOD:
+            if(((INDEX = FIND_IDENTIFIER(STRING + 1)) > 0 && FIND_KEYWORD(KEYWORD_BIT, STRING + 1, INDEX)) != NONE)
+            {
+                
+            }
+            break;
+    
+        default:
+            break;
+    }
 }

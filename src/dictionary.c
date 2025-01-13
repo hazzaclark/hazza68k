@@ -13,37 +13,6 @@ static OUTPUT* OUTPUT_API;
 static FILE* OUTPUT_FILE = NULL;
 static int OPTION_FLAG = OPTION_NONE;
 
-static KEYWORD KEYWORD_BIT[] = 
-{
-    { "b",              BYTE        },
-    { "w",              WORD        },
-    { "l",              LONG        },
-    { NULL }
-};
-
-static KEYWORD KEYWORDS[] = 
-{
-    { "text",           TEXT        },
-    { "data",           DATA        },
-    { "bss",            BSS         },
-	{ "org",            ORG         },
-	{ "start",          START       },
-	{ "align",          ALIGN       },
-	{ "equ",            EQU         },
-	{ "end",            END         },
-	{ "dc",             DC          },
-	{ "ds",             DS          },
-
-	{ "pc",             PC          },
-	{ "sr",             SR          },
-	{ "ccr",            CCR         },
-	{ "usp",            USP         },
-	{ "vbr",            VBR         },
-	{ "sfc",            SFC         },
-	{ "dfc",            DFC         },
-	{ NULL }
-};
-
 //=================================================
 //              DICTIONARY HANDLERS
 //=================================================

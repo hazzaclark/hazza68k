@@ -14,7 +14,7 @@
 
 static MNEOMONIC* MNEOMONIC_BASE = NULL;
 
-static KEYWORD KEYWORD_BIT[] = 
+KEYWORD KEYWORD_BIT[] = 
 {
     { "b",              BYTE        },
     { "w",              WORD        },
@@ -22,7 +22,7 @@ static KEYWORD KEYWORD_BIT[] =
     { NULL }
 };
 
-static KEYWORD KEYWORDS[] = 
+KEYWORD KEYWORDS[] = 
 {
     { "text",           TEXT        },
     { "data",           DATA        },
@@ -134,7 +134,9 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
     switch (*STRING)
     {
         case PERIOD:
-            if(((INDEX = FIND_IDENTIFIER(STRING + 1)) > 0 && FIND_KEYWORD(KEYWORD_BIT, STRING + 1, INDEX)) != NONE)
+            INDEX = FIND_IDENTIFIER(STRING + 1);
+            
+            if(INDEX > 0 && FIND_KEYWORD(KEYWORD_BIT, STRING + 1, INDEX) != NONE)
             {
                 SYM->TEXT = STRING;
                 SYM->LENGTH = INDEX + 1;
@@ -149,6 +151,35 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                 *PTR = STRING = SYM->LENGTH;
             }
 
+            return true;
+
+        case DOLLAR:
+            INDEX = COMPARE_NUMBER(STRING + 1, 16, &(SYM->VALUE));
+
+            if(INDEX > 0)
+            {
+                SYM->ID = NUMBER;
+                SYM->CONTAINS = SYM->VALUE;
+                SYM->TEXT = STRING;
+                SYM->LENGTH = 1 + INDEX;
+                *PTR = STRING + SYM->LENGTH;
+                return true;
+            }
+
+            if(INDEX == 0)
+            {
+                SYM->ID = ADDRESS;
+                SYM->TEXT = STRING;
+                SYM->LENGTH = 1;
+                *PTR = STRING + 1;
+                return true;
+            }
+
+            SYM->ID = ERROR;
+            SYM->TEXT = STRING;
+            SYM->LENGTH = 1 + INDEX;
+            SYM->ERROR = "Halformed Hex value";
+            *PTR = STRING + SYM->LENGTH;
             return true;
     
         default:

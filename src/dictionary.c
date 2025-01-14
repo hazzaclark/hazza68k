@@ -122,3 +122,36 @@ int COMPARE_WORD(char* CHECK, int LEN, char* FIXED)
 
     return (*FIXED);
 }
+
+// COMPARES THROUGH EACH RESPECTIVE CHAR ITERATION TO DISCERN IF THERE IS A DIGIT
+
+int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE)
+{
+    unsigned RESULT = 0;
+    int DIGIT = 0;
+    int LENGTH = 0;
+
+    bool ERROR = false;
+
+    while(DIGIT = (DIGIT_VALUE(*FROM) != NULL))
+    {
+        if(DIGIT < 0) { break; }
+
+        if(DIGIT >= BASE)
+        {
+            ERROR = true;
+        }
+
+        else
+        {
+            RESULT = (RESULT * BASE) + DIGIT;
+        }
+
+        FROM++;
+        LENGTH++;
+    }
+
+    *VALUE = RESULT;
+    PRINT_SEMANTIC(stdout, "Numeric Value: %d\n", RESULT);
+    return ERROR ? -LENGTH : LENGTH;
+}

@@ -155,3 +155,55 @@ int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE)
     PRINT_SEMANTIC(stdout, "Numeric Value: %d\n", RESULT);
     return ERROR ? -LENGTH : LENGTH;
 }
+
+// FIND WHAT LOOKS TO BE A REGISTER DECLARATIVE WITHIN THE DIRECTIVE DEFINTION
+
+DIRECTIVES FIND_REGISTER(char *STRING, int LOOK, int *POS)
+{
+    int RESULT = 0;
+
+    switch (tolower(LOOK))
+    {
+        case 'a':
+            PRINT_SEMANTIC(stdout, "Address Register 'A%d'\n", RESULT);
+            *POS = RESULT;
+            return ADDRESS_REG;
+
+        case 'd':
+            PRINT_SEMANTIC(stdout, "Data Register 'D%d'\n", RESULT);
+            *POS = RESULT;
+            return DATA_REG;
+
+        case 'f':
+            if (STRING[1] == 'p' && strlen(STRING) == 3)
+            {
+                RESULT = digit_value(STRING[2]);
+                if (RESULT >= 0 && RESULT <= 7)
+                {
+                    PRINT_SEMANTIC(stdout, "FPU Register 'FP%d'\n", RESULT);
+                    *POS = RESULT;
+                    return FPU_REG;
+                }
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    if (strncmp(STRING, "sp", 2) == 0)
+    {
+        PRINT_SEMANTIC(stdout, "SP Register 'A7'\n", RESULT);
+        *POS = 7;
+        return ADDRESS_REG;
+    }
+
+    if (strncmp(STRING, "fp", 2) == 0 && strlen(STRING) == 2)
+    {
+        PRINT_SEMANTIC(stdout, "FP Register 'A6'\n", RESULT);
+        *POS = 6;
+        return ADDRESS_REG;
+    }
+
+    return NONE;
+}

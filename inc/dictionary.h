@@ -28,7 +28,6 @@
     ((DIGIT) >= 'A' && (DIGIT) <= 'F') ? ((DIGIT) - 'A' + 10) : \
     (ERROR))
 
-
 typedef struct DIRECTIVE
 {
     int ID;
@@ -65,6 +64,27 @@ int FIND_IDENTIFIER(char* LOOK);
 DIRECTIVES FIND_KEYWORD(KEYWORD* KEY, char* FIND, int INDEX);
 int COMPARE_WORD(char* CHECK, int LEN, char* FIXED);
 int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE);
+
+static inline int FIND_QUOTED(const char *FROM, char Q) 
+{
+    const char *PTR = FROM;
+    int LEN = 0;
+    while (*PTR && *PTR != QUOTE) 
+    {
+        if (*PTR == ESCAPE && *(PTR + 1)) 
+        {
+            LEN += 2; 
+            PTR += 2;
+        } 
+        else 
+        {
+            LEN++;
+            PTR++;
+        }
+    }
+    return LEN;
+}
+
 
 #endif
 #endif 

@@ -65,10 +65,12 @@ DIRECTIVES FIND_KEYWORD(KEYWORD* KEY, char* FIND, int INDEX);
 int COMPARE_WORD(char* CHECK, int LEN, char* FIXED);
 int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE);
 
+DIRECTIVES FIND_REGISTER(char* STRING, int LOOK, int* POS);
+
 static inline int FIND_QUOTED(const char *FROM, char Q) 
 {
     const char *PTR = FROM;
-    int LEN = 0;
+    int LEN = Q;
     while (*PTR && *PTR != QUOTE) 
     {
         if (*PTR == ESCAPE && *(PTR + 1)) 

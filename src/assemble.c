@@ -181,6 +181,32 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
             SYM->ERROR = "Halformed Hex value";
             *PTR = STRING + SYM->LENGTH;
             return true;
+
+        case QUOTE:
+        case QUOTES:
+            
+            char QUOTE_SYM;
+
+            QUOTE_SYM = *STRING++;
+            INDEX = FIND_QUOTED(STRING, QUOTE_SYM);
+
+            if(STRING[INDEX] != QUOTE_SYM)
+            {
+                SYM->ID = ERROR;
+                SYM->TEXT = STRING - 1;
+                SYM->LENGTH = INDEX + 1;
+                SYM->ERROR = (QUOTE_SYM = QUOTES) ? "Malformed String Constant" : 0;
+                *PTR = STRING + 1;
+                return true;
+            }
+
+            SYM->ID = (QUOTE_SYM == QUOTE) ? CHAR : SYM_STRING;
+            SYM->TEXT = STRING;
+            SYM->LENGTH = INDEX;
+            *PTR = STRING + INDEX + 1;
+
+            return true;
+
     
         default:
             break;

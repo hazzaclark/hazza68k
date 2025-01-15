@@ -178,7 +178,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
             SYM->ID = ERROR;
             SYM->TEXT = STRING;
             SYM->LENGTH = 1 + INDEX;
-            SYM->ERROR = "Halformed Hex value";
+            SYM->ERROR = "Malformed Hex value";
             *PTR = STRING + SYM->LENGTH;
             return true;
 
@@ -200,7 +200,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                 return true;
             }
 
-            SYM->ID = (QUOTE_SYM == QUOTE) ? CHAR : SYM_STRING;
+            SYM->ID = (QUOTE_SYM == QUOTE) ? CHAR : 0;
             SYM->TEXT = STRING;
             SYM->LENGTH = INDEX;
             *PTR = STRING + INDEX + 1;
@@ -209,6 +209,105 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 
     
         default:
+
+            if(isdigit(*STRING))
+            {
+                SYM->ID = NUMBER;
+                SYM->CONTAINS = SYM->VALUE;
+                SYM->TEXT = STRING;
+                SYM->LENGTH = INDEX + 2;
+                *PTR = STRING + SYM->LENGTH;
+            }
+
+            else
+            {
+                SYM->ID = ERROR;
+                SYM->TEXT = STRING;
+                SYM->LENGTH = INDEX - 1;
+                SYM->ERROR = "Malformed Hex Value";
+                *PTR = STRING + SYM->LENGTH;
+            }
+
+            // HANDLE ALL OTHER PRE-REQS THAT DONT INVOLVE ENUMERATION SUCH AS REGISTERS
+            // OPERANDS, ETC
+
+            HANDLE_IDENTIFIERS(STRING, SYM, PTR);
+
             break;
+    }
+}
+
+bool HANDLE_IDENTIFIERS(const char* STRING, struct DIRECTIVE_SYM* SYM, const char** PTR)
+{
+    int LENGTH, REG_NUM, SYM_TYPE;
+    char SEPARATOR;
+    int NEXT_REG;
+    const char* CUR_POS;
+
+    // GET IDENTIFIER LENGTH
+
+    LENGTH = FIND_IDENTIFIER(STRING);
+    
+    // HANDLE NON-IDENTIFIER CASES
+
+    if(LENGTH <= 0) 
+    {
+        SYM_TYPE = FIND_SYMBOL(*STRING);
+        if(SYM_TYPE != NONE)
+        {
+            *PTR = STRING + 1;
+            return true;
+        }
+
+        SYM->ERROR = "UNRECOGNISED SYMBOL";
+        *PTR = STRING + 1;
+        return true;
+    }
+
+    // CHECK FOR REGISTER
+    SYM_TYPE = IS_REGISTER(STRING, LENGTH, &REG_NUM);
+    if(SYM_TYPE != NONE)
+    {
+        // HANDLE REGISTER LIST
+        if(IS_REG_TYPE(SYM_TYPE) && IS_LIST_CHAR(STRING[LENGTH]))
+        {
+            CUR_POS = STRING + LENGTH;
+            
+            if(SYM_TYPE == ADDRESS_REG)
+                REG_NUM += 8;
+            
+            SYM->REG_NUM = 1 << REG_NUM;
+
+            // PROCESS REGISTER LIST
+            while(IS_LIST_CHAR(*CUR_POS))
+            {
+                SEPARATOR = *CUR_POS++;
+                SYM->LENGTH++;
+
+                LENGTH = FIND_IDENTIFIER(CUR_POS);
+                if(LENGTH <= 0)
+                {
+                    SYM->ERROR = "MISSING REGISTER IN LIST";
+                    *PTR = CUR_POS;
+                    return true;
+                }
+
+                SYM_TYPE = FIND_REGISTER(CUR_POS, LENGTH, &NEXT_REG);
+                if(!IS_REG_TYPE(SYM_TYPE))
+                {
+                    SYM->ERROR = "INVALID REGISTER IN LIST";
+                    *PTR = CUR_POS;
+                    return true;
+                }
+            }
+
+            *PTR = CUR_POS;
+            return true;
+        }
+
+        // HANDLE SINGLE REGISTER
+        SYM->REG_NUM = REG_NUM;
+        *PTR = STRING + LENGTH;
+        return true;
     }
 }

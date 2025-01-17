@@ -102,7 +102,28 @@ char* PROC_INPUT(int LINE, char* BUFFER)
 
     TAIL = &HEAD;
     SYM = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
-    
+
+    while(NEXT_SYM(&BUFFER, SYM))
+    {
+        // IF WE ENCOUNTER AN ERROR SYMBOL
+
+        if(SYM->ID = ERROR) return(SYM->ERROR);
+
+        // IF WE ENCOUNTER A COMMENT SYMBOL, THEN
+        // DISCERN WHETHER THIS IS EOL AND MOVE ONTO THE NEXT LINE
+
+        if(((SYM->ID == MUL) && (LEN == 0)) || (SYM->ID == SEMICOLON)) break;
+
+        // ADD TO THE END OF THE SYM LIST
+
+        *TAIL = SYM;
+        TAIL = &SYM->NEXT;
+        LEN++;
+    }
+
+    // IF THERE ARE NO MORE SYMBOLS WITHIN THE BUFFER
+
+    *TAIL = NULL;
 }
 
 /* FIND THE NEXT AVAILABLE SYMBOL BASED OFF OF THE POINTER REFERENCE */
@@ -231,13 +252,13 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
             // HANDLE ALL OTHER PRE-REQS THAT DONT INVOLVE ENUMERATION SUCH AS REGISTERS
             // OPERANDS, ETC
 
-            HANDLE_IDENTIFIERS(STRING, SYM, PTR);
+            HANDLE_IDENTIFIERS(*STRING, SYM, *PTR);
 
             break;
     }
 }
 
-bool HANDLE_IDENTIFIERS(const char* STRING, struct DIRECTIVE_SYM* SYM, const char** PTR)
+bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PTR)
 {
     int LENGTH, REG_NUM, SYM_TYPE;
     char SEPARATOR;

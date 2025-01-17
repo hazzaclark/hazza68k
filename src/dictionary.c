@@ -207,3 +207,34 @@ DIRECTIVES FIND_REGISTER(char *STRING, int LOOK, int *POS)
 
     return NONE;
 }
+
+char* PROCESS_INSTRUCTION(INPUT* INPUT)
+{
+    char* ERROR;
+    OPCODE* LOOK;
+
+    int INDEX = 1;
+
+    if(INPUT->LABEL != NULL && (ERROR = (INPUT->LABEL->TEXT), INPUT->LABEL->LENGTH != NULL)) { return ERROR; }
+
+    for(LOOK = INPUT->ACTION->OP; LOOK != NULL; LOOK = LOOK->NEXT)
+    {
+        int SIZE = 0;
+
+        switch (LOOK->SIZE)
+        {
+            case SIZE_UNDEF: SIZE = (INPUT->SIZE == SIZE_UNDEF); break;
+            case SIZE_BYTE: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_BYTE); break;
+        
+            default:
+                break;
+        }
+    }   
+}
+
+char* PROCESS_INSTRUCTION_LINE(PARSED* LINE, DIRECTIVE_SYM* SYM)
+{
+    LINE->ACTION = SYM;
+    LINE->IS_INSTR = true;
+    SYM = SYM->NEXT;
+}

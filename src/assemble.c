@@ -95,7 +95,7 @@ int PASS_FILE(FILE* SOURCE)
 /* THE FOLLOWING WILL BREAK DOWN THE CORRESPONDENCE INTO SMALLER SECTIONS */
 /* IN ORDER TO PARSE EXPRESSIONS AND CALLS THE RELEVANT ROUTINE TO HANDLE SAID INPUT */
 
-char* PROC_INPUT(int LINE, char* BUFFER)
+char* PROC_INPUT(char* BUFFER)
 {   
     DIRECTIVE_SYM* HEAD, **TAIL, *SYM, *TOP;
     INPUT* INP;
@@ -108,7 +108,7 @@ char* PROC_INPUT(int LINE, char* BUFFER)
     {
         // IF WE ENCOUNTER AN ERROR SYMBOL
 
-        if(SYM->ID = ERROR) return(SYM->ERROR);
+        if(SYM->ID == ERROR) return(SYM->ERROR);
 
         // IF WE ENCOUNTER A COMMENT SYMBOL, THEN
         // DISCERN WHETHER THIS IS EOL AND MOVE ONTO THE NEXT LINE
@@ -141,7 +141,7 @@ char* PROC_INPUT(int LINE, char* BUFFER)
 
     SYM = HEAD;
 
-    if(SYM->ID = SYM_IDENTIFIER)
+    if(SYM->ID == SYM_IDENTIFIER)
     {
         P_LINE->LABEL = SYM;
         SYM = SYM->NEXT;
@@ -191,9 +191,6 @@ char* PROC_INPUT(int LINE, char* BUFFER)
 
         while(SYM != NULL)
         {
-            char* EXPR;
-            int INDEX;
-
             // ASSUME THAT THERE ARE TOO MANY ARGS PROVIDED
 
             if(INP->ARGS == PARAM_INSTR_ARGS) return ("Too many Arguments for a valid Opcode");
@@ -268,8 +265,7 @@ char* PROC_INPUT(int LINE, char* BUFFER)
 int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 {
     char* STRING;
-    DIRECTIVES SYM_INDEX;
-
+    char QUOTE_SYM;
     int INDEX = 0;
 
     // INIT SETUP FOR SYMBOL LOOKUP
@@ -304,7 +300,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                 SYM->TEXT = STRING;
                 SYM->LENGTH = INDEX + 1;
                 SYM->ERROR = "Unrecognised Keyword";
-                *PTR = STRING = SYM->LENGTH;
+                *PTR = STRING + SYM->LENGTH;
             }
 
             return true;
@@ -340,8 +336,6 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 
         case QUOTE:
         case QUOTES:
-            
-            char QUOTE_SYM;
 
             QUOTE_SYM = *STRING++;
             INDEX = FIND_QUOTED(STRING, QUOTE_SYM);
@@ -387,7 +381,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
             // HANDLE ALL OTHER PRE-REQS THAT DONT INVOLVE ENUMERATION SUCH AS REGISTERS
             // OPERANDS, ETC
 
-            HANDLE_IDENTIFIERS(*STRING, SYM, *PTR);
+            HANDLE_IDENTIFIERS(STRING, SYM, (const char**)PTR);
 
             break;
     }
@@ -396,9 +390,8 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PTR)
 {
     int LENGTH, REG_NUM, SYM_TYPE;
-    char SEPARATOR;
     int NEXT_REG;
-    const char* CUR_POS;
+    char* CUR_POS;
 
     // GET IDENTIFIER LENGTH
 
@@ -422,7 +415,7 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
 
     // CHECK FOR REGISTER
 
-    SYM_TYPE = FIND_REGISTER(STRING, LENGTH, &REG_NUM);
+    SYM_TYPE = FIND_REGISTER(CUR_POS, LENGTH, &NEXT_REG);
     if(SYM_TYPE != NONE)
     {
         // HANDLE REGISTER LIST
@@ -440,7 +433,6 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
 
             while(IS_LIST_CHAR(*CUR_POS))
             {
-                SEPARATOR = *CUR_POS++;
                 SYM->LENGTH++;
 
                 LENGTH = FIND_IDENTIFIER(CUR_POS);
@@ -467,7 +459,9 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
         // HANDLE SINGLE REGISTER
 
         SYM->REG_NUM = REG_NUM;
-        *PTR = STRING + LENGTH;
+        *PTR = STRING + SYM->LENGTH;
         return true;
     }
+
+    return false;
 }

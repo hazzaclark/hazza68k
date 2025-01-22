@@ -225,8 +225,21 @@ char* PROCESS_INSTRUCTION(INPUT* INPUT)
         {
             case SIZE_UNDEF: SIZE = (INPUT->SIZE == SIZE_UNDEF); break;
             case SIZE_BYTE: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_BYTE); break;
+            case SIZE_WORD: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_WORD); break;
+            case SIZE_LONG: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_LONG); break; 
+            
         
             default:
+                if((INPUT->SIZE == SIZE_UNDEF) && (LOOK->SIZE & SIZE_WORD))
+                {
+                    INPUT->SIZE = SIZE_WORD;
+                }
+
+                else
+                {
+                    SIZE = ((LOOK->SIZE & INPUT->SIZE) != 0);
+                }
+
                 break;
         }
     }   

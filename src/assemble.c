@@ -98,6 +98,7 @@ int PASS_FILE(FILE* SOURCE)
 char* PROC_INPUT(int LINE, char* BUFFER)
 {   
     DIRECTIVE_SYM* HEAD, **TAIL, *SYM, *TOP;
+    INPUT* INP;
     int LEN = 0;
 
     TAIL = &HEAD;
@@ -124,6 +125,140 @@ char* PROC_INPUT(int LINE, char* BUFFER)
     // IF THERE ARE NO MORE SYMBOLS WITHIN THE BUFFER
 
     *TAIL = NULL;
+
+    // NOW ANALYSE THE LINE TO SEE WHAT THE FINAL OUTCOME WAS OF THE PREVIOUS
+    // THIS WILL BE DONE BY LOOKING AT THE HEAD OF THE LIST AND CHECKING FOR EMPTY LINES
+
+    TAIL = &HEAD;
+
+    // INIT BUFFER FOR PARSING LINE
+
+    PARSED* P_LINE = (PARSED*)malloc(sizeof(P_LINE));
+    memset(P_LINE, 0, sizeof(*P_LINE));
+    P_LINE->SYM = HEAD;
+
+    // START AT THE BEGINNING ON THE LIST, AND WORK OUR WAY DOWNWARDS
+
+    SYM = HEAD;
+
+    if(SYM->ID = SYM_IDENTIFIER)
+    {
+        P_LINE->LABEL = SYM;
+        SYM = SYM->NEXT;
+    }
+
+    if(SYM->ID == COLON) SYM = SYM->NEXT;
+
+    // NOW WE WILL PROCESS THE INSTRUCTIONS OR DIRECTIVES PROVIDED IN SEPERATE FUNCTIONS
+
+    if(SYM->ID == SYM_OPCODE)
+    {
+        INP->ACTION = SYM;
+        INP->INSTR = true;
+        INP->ARGS = 0;
+
+        // IS THIS THE END OF THE INSTRUCTION?
+
+        if((SYM = *(TAIL = &(SYM->NEXT))) == NULL) return PROCESS_INSTRUCTION(INP);
+
+        // DEFINE EXPLICIT SIZING PER EACH INSTRUCTION (ASSUMING IT HAS BEEN CAST)
+
+        switch (SYM->ID)
+        {
+            case BYTE:
+                INP->SIZE = SIZE_BYTE;
+                SYM = *(TAIL = &(SYM->NEXT));
+                break;
+
+            case WORD:
+                INP->SIZE = SIZE_WORD;
+                SYM = *(TAIL = &(SYM->NEXT));
+                break;
+
+            case LONG:
+                INP->SIZE = SIZE_LONG;
+                SYM = *(TAIL = &(SYM->NEXT));
+                break;
+        
+            default:
+                break;
+        }
+
+        // GATHER ALL OF THE CORRESPONDING ARGUMENTS ASSOCIATED
+        // WITH THE EXPLICIT SIZING
+
+        // THIS WILL ALLOW US TO EVALUATE EXPRESSIONS TO PROCESS THE INSTRUCTION
+
+        while(SYM != NULL)
+        {
+            char* EXPR;
+            int INDEX;
+
+            // ASSUME THAT THERE ARE TOO MANY ARGS PROVIDED
+
+            if(INP->ARGS == PARAM_INSTR_ARGS) return ("Too many Arguments for a valid Opcode");
+
+            if(SYM->ID == HASH)
+            {
+                HEAD = (DIRECTIVE_SYM*)malloc(sizeof(SYM));
+                HEAD->ID = EXP;
+                HEAD->EXPR = TOP;
+                HEAD->NEXT = SYM;
+                SYM = *TAIL;
+                SYM->NEXT = HEAD;
+            }
+
+            else
+            {
+                HEAD->ID = EXP;
+                HEAD->EXPR = TOP;
+                HEAD->NEXT = SYM;
+                *TAIL = HEAD;
+                TAIL = &(HEAD->NEXT);
+                *TAIL = SYM;
+                SYM = HEAD;
+            }
+        }
+
+        return PROCESS_INSTRUCTION(INP);
+ 
+    }
+
+    // DO WE HAVE A VALID DIRECTIVE WITHIN THIS DECLARATION!?
+
+    if(FIND_DIRECTIVE(SYM->ID) != NULL)
+    {
+        INP->ACTION = SYM;
+        INP->INSTR = false;
+        INP->ARGS = 0;
+
+        // WHEN WE REACH THE END OF THE INSTRICTION
+
+        if((SYM = *(TAIL = &(SYM->NEXT))) == NULL) return PROCESS_DIRECTIVE(INP);
+
+        switch (SYM->ID)
+        {
+            case BYTE:
+                INP->SIZE = SIZE_BYTE;
+                SYM = *(TAIL = &(SYM->NEXT));
+                break;
+
+            case WORD:
+                INP->SIZE = SIZE_WORD;
+                SYM = *(TAIL = &(SYM->NEXT));
+                break;
+
+            case LONG:
+                INP->SIZE = SIZE_LONG;
+                SYM = *(TAIL = &(SYM->NEXT));
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    return PROCESS_DIRECTIVE(INP);
 }
 
 /* FIND THE NEXT AVAILABLE SYMBOL BASED OFF OF THE POINTER REFERENCE */
@@ -286,10 +421,12 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
     }
 
     // CHECK FOR REGISTER
+
     SYM_TYPE = FIND_REGISTER(STRING, LENGTH, &REG_NUM);
     if(SYM_TYPE != NONE)
     {
         // HANDLE REGISTER LIST
+
         if(IS_REG_TYPE(SYM_TYPE) && IS_LIST_CHAR(STRING[LENGTH]))
         {
             CUR_POS = STRING + LENGTH;
@@ -300,6 +437,7 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
             SYM->REG_NUM = 1 << REG_NUM;
 
             // PROCESS REGISTER LIST
+
             while(IS_LIST_CHAR(*CUR_POS))
             {
                 SEPARATOR = *CUR_POS++;
@@ -327,6 +465,7 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
         }
 
         // HANDLE SINGLE REGISTER
+
         SYM->REG_NUM = REG_NUM;
         *PTR = STRING + LENGTH;
         return true;

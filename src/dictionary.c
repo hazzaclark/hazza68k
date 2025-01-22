@@ -35,6 +35,26 @@ void END_OUTPUT(void)
     }
 }
 
+static SYM_ID SYM_IDS[] =
+{
+    {PLUS,              SYM_PLUS},
+    {MINUS,             SYM_MINUS},
+    {ASTERIX,           MUL},
+    {SLASH,             DIV},
+    {PERCENT,           MOD},
+    {OPAREN,            SYM_OPAREN},
+    {CPAREN,            SYM_CPAREN},
+    {COLON,             SYM_COLON},
+    {SEMICOLON,         SYM_SEMICOLON},
+    {HASH,              SYM_HASH},
+    {COMMA,             SYM_COMMA},
+    {HAT,               EOR},
+    {BANG,              NOT},
+    {AMPERSAND,         AND},
+    {PIPE,               OR},
+    {PARAM_EOS             }
+};
+
 //=================================================
 //          MISC. FUNCTIONS AND HANDLERS
 //=================================================
@@ -133,7 +153,7 @@ int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE)
 
     bool ERROR = false;
 
-    while(DIGIT = (DIGIT_VALUE(*FROM) != NULL))
+    while((DIGIT = DIGIT_VALUE(*FROM) >= 0))
     {
         if(DIGIT < 0) { break; }
 
@@ -156,9 +176,21 @@ int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE)
     return ERROR ? -LENGTH : LENGTH;
 }
 
+DIRECTIVES FIND_SYMBOL(char* FIND)
+{
+    SYM_ID* LOOK;
+
+    for(LOOK = SYM_IDS; LOOK->SYMBOL != PARAM_EOS; LOOK++)
+    {
+        if(*FIND == LOOK->SYMBOL) { PRINT_SEMANTIC(stdout, "Found Symbol: '%c'\n", LOOK->SYMBOL); return LOOK->ID; }
+    }
+
+    return NONE;
+}
+
 // FIND WHAT LOOKS TO BE A REGISTER DECLARATIVE WITHIN THE DIRECTIVE DEFINTION
 
-DIRECTIVES FIND_REGISTER(char *STRING, int LOOK, int *POS)
+DIRECTIVES FIND_REGISTER(char* STRING, int LOOK, int* POS)
 {
     int RESULT = 0;
 
@@ -213,20 +245,25 @@ char* PROCESS_INSTRUCTION(INPUT* INPUT)
     char* ERROR;
     OPCODE* LOOK;
 
-    int INDEX = 1;
-
-    if(INPUT->LABEL != NULL && (ERROR = (INPUT->LABEL->TEXT), INPUT->LABEL->LENGTH != NULL)) { return ERROR; }
+    if (INPUT->LABEL != NULL) 
+    {
+        ERROR = INPUT->LABEL->TEXT;
+        if (INPUT->LABEL->LENGTH > 0) 
+        {
+            return ERROR;
+        }
+    }
 
     for(LOOK = INPUT->ACTION->OP; LOOK != NULL; LOOK = LOOK->NEXT)
     {
-        int SIZE = 0;
+        int* SIZE = 0;
 
         switch (LOOK->SIZE)
         {
-            case SIZE_UNDEF: SIZE = (INPUT->SIZE == SIZE_UNDEF); break;
-            case SIZE_BYTE: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_BYTE); break;
-            case SIZE_WORD: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_WORD); break;
-            case SIZE_LONG: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_LONG); break; 
+            case SIZE_UNDEF: SIZE += (INPUT->SIZE == SIZE_UNDEF); break;
+            case SIZE_BYTE: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_BYTE); break;
+            case SIZE_WORD: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_WORD); break;
+            case SIZE_LONG: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_LONG); break; 
             
         
             default:
@@ -237,7 +274,7 @@ char* PROCESS_INSTRUCTION(INPUT* INPUT)
 
                 else
                 {
-                    SIZE = ((LOOK->SIZE & INPUT->SIZE) != 0);
+                    SIZE += ((LOOK->SIZE & INPUT->SIZE) != 0);
                 }
 
                 break;

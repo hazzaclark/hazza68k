@@ -177,7 +177,7 @@ DIRECTIVES FIND_REGISTER(char *STRING, int LOOK, int *POS)
         case 'f':
             if (STRING[1] == 'p' && strlen(STRING) == 3)
             {
-                RESULT = digit_value(STRING[2]);
+                RESULT = DIGIT_VALUE(STRING[2]);
                 if (RESULT >= 0 && RESULT <= 7)
                 {
                     PRINT_SEMANTIC(stdout, "FPU Register 'FP%d'\n", RESULT);
@@ -242,12 +242,10 @@ char* PROCESS_INSTRUCTION(INPUT* INPUT)
 
                 break;
         }
-    }   
-}
+    } 
 
-char* PROCESS_INSTRUCTION_LINE(PARSED* LINE, DIRECTIVE_SYM* SYM)
-{
-    LINE->ACTION = SYM;
-    LINE->IS_INSTR = true;
-    SYM = SYM->NEXT;
+    // HAVE WE ENCOUNTERED AN ERROR AT ALL?
+
+    if(LOOK == NULL) return( "Invalid Instruction" );
+    return NULL;  
 }

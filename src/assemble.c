@@ -98,11 +98,12 @@ int PASS_FILE(FILE* SOURCE)
 char* PROC_INPUT(char* BUFFER)
 {   
     DIRECTIVE_SYM* HEAD, **TAIL, *SYM, *TOP;
-    INPUT* INP;
+    INPUT* INP = (INPUT*)malloc(sizeof(INP));
     int LEN = 0;
 
     TAIL = &HEAD;
     SYM = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
+    TOP = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
 
     while(NEXT_SYM(&BUFFER, SYM))
     {
@@ -389,9 +390,10 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 
 bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PTR)
 {
-    int LENGTH, REG_NUM, SYM_TYPE;
+    int LENGTH, SYM_TYPE;
+    int REG_NUM = 0;
     int NEXT_REG;
-    char* CUR_POS;
+    char* CUR_POS = 0;
 
     // GET IDENTIFIER LENGTH
 
@@ -401,7 +403,7 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
 
     if(LENGTH <= 0) 
     {
-        SYM_TYPE = FIND_SYMBOL(*STRING);
+        SYM_TYPE = FIND_SYMBOL(STRING);
         if(SYM_TYPE != NONE)
         {
             *PTR = STRING + 1;
@@ -425,7 +427,7 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
             CUR_POS = STRING + LENGTH;
             
             if(SYM_TYPE == ADDRESS_REG)
-                REG_NUM += 8;
+                REG_NUM = 8;
             
             SYM->REG_NUM = 1 << REG_NUM;
 
@@ -458,7 +460,7 @@ bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PT
 
         // HANDLE SINGLE REGISTER
 
-        SYM->REG_NUM = REG_NUM;
+        SYM->REG_NUM += REG_NUM;
         *PTR = STRING + SYM->LENGTH;
         return true;
     }

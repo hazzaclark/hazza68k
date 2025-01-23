@@ -42,6 +42,7 @@
 
 
 #define         PRINT_SEMANTIC(STATE, COMMENT, ADDRESS) fprintf(stderr, COMMENT)
+#define		PRINT_REGISTER(STATE, COMMENT, ADDRESS) fprintf(stdout, COMMENT, ADDRESS)
 #define         PRINT_INTERNAL(STATE) fputs(stderr, " ", STATE)
 
 #define         FLAG_68000                  00000

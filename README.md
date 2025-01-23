@@ -1,7 +1,7 @@
 # hazza68k
 My memory efficient Motorola 68000 Assembler 
 
-![image](https://github.com/user-attachments/assets/f0f26e56-9332-4a5c-bf18-ea0e17bc6bfd)
+![image](https://github.com/user-attachments/assets/eee91b5f-078d-4d97-8551-e12bb0c1eccb)
 
 # Motive:
 

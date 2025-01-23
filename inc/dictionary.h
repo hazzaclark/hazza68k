@@ -47,7 +47,7 @@
 typedef struct DIRECTIVE
 {
     int ID;
-    char(*DIRECTIVE_ACTION)(int* VALUE);
+    char* (*DIRECTIVE_ACTION)(int VALUE);
 
 } DIRECTIVE;
 

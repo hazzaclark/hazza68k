@@ -55,6 +55,21 @@ static SYM_ID SYM_IDS[] =
     {PARAM_EOS             }
 };
 
+static DIRECTIVE DIR_LIST[] = 
+{
+    {TEXT,              NULL},
+    {DATA,              NULL},
+    {BSS,               NULL},
+    {ORG,               NULL},
+    {START,             NULL},
+    {ALIGN,             NULL},
+    {EQU,               NULL},
+    {END,               NULL},
+    {DC,                NULL},
+    {DS,                NULL},
+    {NONE}
+};
+
 //=================================================
 //          MISC. FUNCTIONS AND HANDLERS
 //=================================================

@@ -108,14 +108,24 @@ IDENTIFIER* LOCATE_IDEN(char* VALUE)
 
 DIRECTIVE* FIND_DIRECTIVE(int ID)
 {
-    ((void)ID);
+    DIRECTIVE* LOOK;
+
+    for(LOOK = DIR_LIST; LOOK->ID != NONE; LOOK++)
+    {
+        if(LOOK->ID == ID) { return LOOK; }
+    }
+
     return NULL;
 }
 
 char* PROCESS_DIRECTIVE(INPUT* INPUT)
 {
-    ((void)INPUT);
-    return NULL;
+    DIRECTIVE* DIR;
+
+    if((DIR = FIND_DIRECTIVE((int)INPUT->LABEL)) == NULL) 
+        return "Directive not implemented";
+    
+    return DIR->DIRECTIVE_ACTION((int)INPUT);
 }
 
 // LOOKS FOR A VALID IDENITIFIER BASED ON A POINTER VALUE

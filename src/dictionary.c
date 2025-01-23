@@ -159,7 +159,7 @@ int COMPARE_WORD(char* CHECK, int LEN, char* FIXED)
 
 int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE)
 {
-    unsigned RESULT = 0;
+    int RESULT = 0;
     int DIGIT = 0;
     int LENGTH = 0;
 
@@ -184,7 +184,6 @@ int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE)
     }
 
     *VALUE = RESULT;
-    PRINT_SEMANTIC(stdout, "Numeric Value: %d\n", RESULT);
     return ERROR ? -LENGTH : LENGTH;
 }
 
@@ -194,7 +193,10 @@ DIRECTIVES FIND_SYMBOL(char* FIND)
 
     for(LOOK = SYM_IDS; LOOK->SYMBOL != PARAM_EOS; LOOK++)
     {
-        if(*FIND == LOOK->SYMBOL) { PRINT_SEMANTIC(stdout, "Found Symbol: '%c'\n", LOOK->SYMBOL); return LOOK->ID; }
+        if(*FIND == LOOK->SYMBOL) 
+	{ 
+		PRINT_REGISTER(stdout, "Found Symbol: '%c\n", LOOK->SYMBOL); return LOOK->ID; 
+	}
     }
 
     return NONE;
@@ -209,14 +211,14 @@ DIRECTIVES FIND_REGISTER(char* STRING, int LOOK, int* POS)
     switch (tolower(LOOK))
     {
         case 'a':
-            PRINT_SEMANTIC(stdout, "Address Register 'A%d'\n", RESULT);
-            *POS = RESULT;
-            return ADDRESS_REG;
+		PRINT_REGISTER(stdout, "Address Register 'A%d'\n", RESULT);
+		*POS = RESULT;
+		return ADDRESS_REG;
 
         case 'd':
-            PRINT_SEMANTIC(stdout, "Data Register 'D%d'\n", RESULT);
-            *POS = RESULT;
-            return DATA_REG;
+		PRINT_REGISTER(stdout, "Data Register: 'D%d'\n", RESULT);
+            	*POS = RESULT;
+            	return DATA_REG;
 
         case 'f':
             if (STRING[1] == 'p' && strlen(STRING) == 3)
@@ -224,9 +226,9 @@ DIRECTIVES FIND_REGISTER(char* STRING, int LOOK, int* POS)
                 RESULT = DIGIT_VALUE(STRING[2]);
                 if (RESULT >= 0 && RESULT <= 7)
                 {
-                    PRINT_SEMANTIC(stdout, "FPU Register 'FP%d'\n", RESULT);
-                    *POS = RESULT;
-                    return FPU_REG;
+			PRINT_REGISTER(stdout, "FPU Register: 'FP%d'\n", RESULT);
+                    	*POS = RESULT;
+                    	return FPU_REG;
                 }
             }
             break;

@@ -2,468 +2,301 @@
 
 /* MOTOROLA 68000 ASSEMBLER */
 
-/* THIS FILE HOUSES THE NECESSITIES FOR THE ASSEMBLY PROCESS */
-/* FOCUSSING ON THE BACKEND OF THE ASSEMBLER */
+/* THIS FILE HOUSES THE NECESSITIES FOR THE DICTIONARY DEFINITIONS */
 
 /* NESTED INCLUDES */
 
 #include "assemble.h"
 #include "dictionary.h"
 
-#undef USE_DISASM
+static OUTPUT* OUTPUT_API;
+static FILE* OUTPUT_FILE = NULL;
+static int OPTION_FLAG = OPTION_NONE;
 
-static MNEOMONIC* MNEOMONIC_BASE = NULL;
+//=================================================
+//              DICTIONARY HANDLERS
+//=================================================
 
-KEYWORD KEYWORD_BIT[] = 
+void NEXT_LINE(int LINE, char* SOURCE) { OUTPUT_API->NEXT_LINE(LINE, SOURCE); }
+
+void SET_ADDRESS(U32 ADDRESS) { OUTPUT_API->SET_ADDRESS(ADDRESS); }
+
+void SET_START(U32 ADDRESS) { OUTPUT_API->SET_START(ADDRESS); }
+
+void ADD_BYTE(U8 DATA) { OUTPUT_API->ADD_BYTE(DATA); }
+
+void END_OUTPUT(void)
 {
-    { "b",              BYTE        },
-    { "w",              WORD        },
-    { "l",              LONG        },
-    { NULL }
-};
-
-KEYWORD KEYWORDS[] = 
-{
-    { "text",           TEXT        },
-    { "data",           DATA        },
-    { "bss",            BSS         },
-	{ "org",            ORG         },
-	{ "start",          START       },
-	{ "align",          ALIGN       },
-	{ "equ",            EQU         },
-	{ "end",            END         },
-	{ "dc",             DC          },
-	{ "ds",             DS          },
-
-	{ "pc",             PC          },
-	{ "sr",             SR          },
-	{ "ccr",            CCR         },
-	{ "usp",            USP         },
-	{ "vbr",            VBR         },
-	{ "sfc",            SFC         },
-	{ "dfc",            DFC         },
-	{ NULL }
-};
-
-/*=================================================
-          OPCODE AND OPTION HANDLERS
-=================================================*/
-
-// FIND AND PARSE THE DESIGNATED OPCODES PROVIDED THROUGH THE SOURCE FILE
-// THIS CAN BE DONE USING THE MNEMONIC STRUCT TO LOOK FOR THE SPECIFIC KEY VALUE
-// ASSOCIATED WITH EACH
-
-OPCODE* FIND_OPCODE(char* MATCH, int LEN)
-{
-    int COMPARE = 0;
-
-    COMPARE = strncmp(MATCH, MNEOMONIC_BASE->NAME, LEN);
-    
-    if (COMPARE == 0) 
+    OUTPUT_API->END_OUTPUT();
+    if(OUTPUT_FILE && OPTION_FLAG & STD_DISPLAY_OUT)
     {
-        printf("Found Opcode: %s\n", MNEOMONIC_BASE->NAME);
-        return MNEOMONIC_BASE->OPCODES; 
+        fclose(OUTPUT_FILE);
+        OUTPUT_FILE = NULL;
+    }
+}
+
+static SYM_ID SYM_IDS[] =
+{
+    {PLUS,              SYM_PLUS},
+    {MINUS,             SYM_MINUS},
+    {ASTERIX,           MUL},
+    {SLASH,             DIV},
+    {PERCENT,           MOD},
+    {OPAREN,            SYM_OPAREN},
+    {CPAREN,            SYM_CPAREN},
+    {COLON,             SYM_COLON},
+    {SEMICOLON,         SYM_SEMICOLON},
+    {HASH,              SYM_HASH},
+    {COMMA,             SYM_COMMA},
+    {HAT,               EOR},
+    {BANG,              NOT},
+    {AMPERSAND,         AND},
+    {PIPE,               OR},
+    {PARAM_EOS             }
+};
+
+//=================================================
+//          MISC. FUNCTIONS AND HANDLERS
+//=================================================
+
+/* LOOK THROUGH THE DESIGNATED FILE PROVIDED TO LOOK FOR IDENTIFIER'S */
+/* SUCH AS NAME USED FOR DEFINING MACROS, HEADERS, ETC */
+
+IDENTIFIER* LOCATE_IDEN(char* VALUE)
+{
+    IDENTIFIER* LOOK = NULL;
+    IDENTIFIER* ADDRESS = NULL;
+    int INDEX = 0;
+
+    /* ASSERT IT'S TRUTH VALUE BEFORE READING */
+    assert(VALUE != NULL);
+
+    /* THIS WILL LOOK TO DETERMINE IF THERE IS A RELEVANT AND CORRESPONDING */
+    /* VALUE WITH A DESIGNATED ADDRESS */
+
+    while((LOOK += *(char*)ADDRESS) != NULL)
+    {
+        if((INDEX = strcmp(VALUE, LOOK->NAME)) == 0) return(LOOK);
     }
 
-    MNEOMONIC_BASE = (COMPARE < 0) ? MNEOMONIC_BASE->BEFORE : MNEOMONIC_BASE->AFTER;
+    /* IF THE IDENTIFIER IS NOT ACCESSED YET, WE CAN ACCESS IT NOW */
+
+    printf("New Identifier %s\n", VALUE);
+
+    LOOK->NAME = strrchr(VALUE, 0);
+    LOOK->DEFINED = false;
+    LOOK->VALUE = 0;
+    LOOK->BEFORE = NULL;
+    LOOK->AFTER = NULL;
+    return LOOK;
+}
+
+DIRECTIVE* FIND_DIRECTIVE(int ID)
+{
+    ((void)ID);
     return NULL;
 }
 
-int PASS_FILE(FILE* SOURCE)
+char* PROCESS_DIRECTIVE(INPUT* INPUT)
 {
-    char BUFFER[MAX_BIT_ARGS];
-
-    int LINE = 0;
-
-    /* ASSUME THERE IS A CURRENT FILE BEING PASSED THROUGH */
-    /* EVALUATE LENGTH FROM THE START TO THE END */
-
-    while(fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
-    {
-        BUFFER[strlen(BUFFER) - 1] = EOF;
-        LINE++;
-
-        /* CHECK THROUGH EACH CORRESPONDING LINE */
-
-        NEXT_LINE(LINE, BUFFER);
-    }
-
-    return 0;
+    ((void)INPUT);
+    return NULL;
 }
 
-/* PROCESS THE INPUT PROVIDED FROM THE INPUT LINE */
-/* THE FOLLOWING WILL BREAK DOWN THE CORRESPONDENCE INTO SMALLER SECTIONS */
-/* IN ORDER TO PARSE EXPRESSIONS AND CALLS THE RELEVANT ROUTINE TO HANDLE SAID INPUT */
+// LOOKS FOR A VALID IDENITIFIER BASED ON A POINTER VALUE
+// THAT READS AHEAD OF TIME, AND RETURNS THE NUMBER OF CHARACTERS
+// THAT ENCOMPASS A VALID IDENTIFIER
 
-char* PROC_INPUT(char* BUFFER)
-{   
-    DIRECTIVE_SYM* HEAD, **TAIL, *SYM, *TOP;
-    INPUT* INP = (INPUT*)malloc(sizeof(INP));
-    int LEN = 0;
-
-    TAIL = &HEAD;
-    SYM = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
-    TOP = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
-
-    while(NEXT_SYM(&BUFFER, SYM))
-    {
-        // IF WE ENCOUNTER AN ERROR SYMBOL
-
-        if(SYM->ID == ERROR) return(SYM->ERROR);
-
-        // IF WE ENCOUNTER A COMMENT SYMBOL, THEN
-        // DISCERN WHETHER THIS IS EOL AND MOVE ONTO THE NEXT LINE
-
-        if(((SYM->ID == MUL) && (LEN == 0)) || (SYM->ID == SEMICOLON)) break;
-
-        // ADD TO THE END OF THE SYM LIST
-
-        *TAIL = SYM;
-        TAIL = &SYM->NEXT;
-        LEN++;
-    }
-
-    // IF THERE ARE NO MORE SYMBOLS WITHIN THE BUFFER
-
-    *TAIL = NULL;
-
-    // NOW ANALYSE THE LINE TO SEE WHAT THE FINAL OUTCOME WAS OF THE PREVIOUS
-    // THIS WILL BE DONE BY LOOKING AT THE HEAD OF THE LIST AND CHECKING FOR EMPTY LINES
-
-    TAIL = &HEAD;
-
-    // INIT BUFFER FOR PARSING LINE
-
-    PARSED* P_LINE = (PARSED*)malloc(sizeof(P_LINE));
-    memset(P_LINE, 0, sizeof(*P_LINE));
-    P_LINE->SYM = HEAD;
-
-    // START AT THE BEGINNING ON THE LIST, AND WORK OUR WAY DOWNWARDS
-
-    SYM = HEAD;
-
-    if(SYM->ID == SYM_IDENTIFIER)
-    {
-        P_LINE->LABEL = SYM;
-        SYM = SYM->NEXT;
-    }
-
-    if(SYM->ID == COLON) SYM = SYM->NEXT;
-
-    // NOW WE WILL PROCESS THE INSTRUCTIONS OR DIRECTIVES PROVIDED IN SEPERATE FUNCTIONS
-
-    if(SYM->ID == SYM_OPCODE)
-    {
-        INP->ACTION = SYM;
-        INP->INSTR = true;
-        INP->ARGS = 0;
-
-        // IS THIS THE END OF THE INSTRUCTION?
-
-        if((SYM = *(TAIL = &(SYM->NEXT))) == NULL) return PROCESS_INSTRUCTION(INP);
-
-        // DEFINE EXPLICIT SIZING PER EACH INSTRUCTION (ASSUMING IT HAS BEEN CAST)
-
-        switch (SYM->ID)
-        {
-            case BYTE:
-                INP->SIZE = SIZE_BYTE;
-                SYM = *(TAIL = &(SYM->NEXT));
-                break;
-
-            case WORD:
-                INP->SIZE = SIZE_WORD;
-                SYM = *(TAIL = &(SYM->NEXT));
-                break;
-
-            case LONG:
-                INP->SIZE = SIZE_LONG;
-                SYM = *(TAIL = &(SYM->NEXT));
-                break;
-        
-            default:
-                break;
-        }
-
-        // GATHER ALL OF THE CORRESPONDING ARGUMENTS ASSOCIATED
-        // WITH THE EXPLICIT SIZING
-
-        // THIS WILL ALLOW US TO EVALUATE EXPRESSIONS TO PROCESS THE INSTRUCTION
-
-        while(SYM != NULL)
-        {
-            // ASSUME THAT THERE ARE TOO MANY ARGS PROVIDED
-
-            if(INP->ARGS == PARAM_INSTR_ARGS) return ("Too many Arguments for a valid Opcode");
-
-            if(SYM->ID == HASH)
-            {
-                HEAD = (DIRECTIVE_SYM*)malloc(sizeof(SYM));
-                HEAD->ID = EXP;
-                HEAD->EXPR = TOP;
-                HEAD->NEXT = SYM;
-                SYM = *TAIL;
-                SYM->NEXT = HEAD;
-            }
-
-            else
-            {
-                HEAD->ID = EXP;
-                HEAD->EXPR = TOP;
-                HEAD->NEXT = SYM;
-                *TAIL = HEAD;
-                TAIL = &(HEAD->NEXT);
-                *TAIL = SYM;
-                SYM = HEAD;
-            }
-        }
-
-        return PROCESS_INSTRUCTION(INP);
- 
-    }
-
-    // DO WE HAVE A VALID DIRECTIVE WITHIN THIS DECLARATION!?
-
-    if(FIND_DIRECTIVE(SYM->ID) != NULL)
-    {
-        INP->ACTION = SYM;
-        INP->INSTR = false;
-        INP->ARGS = 0;
-
-        // WHEN WE REACH THE END OF THE INSTRICTION
-
-        if((SYM = *(TAIL = &(SYM->NEXT))) == NULL) return PROCESS_DIRECTIVE(INP);
-
-        switch (SYM->ID)
-        {
-            case BYTE:
-                INP->SIZE = SIZE_BYTE;
-                SYM = *(TAIL = &(SYM->NEXT));
-                break;
-
-            case WORD:
-                INP->SIZE = SIZE_WORD;
-                SYM = *(TAIL = &(SYM->NEXT));
-                break;
-
-            case LONG:
-                INP->SIZE = SIZE_LONG;
-                SYM = *(TAIL = &(SYM->NEXT));
-                break;
-        
-            default:
-                break;
-        }
-    }
-
-    return PROCESS_DIRECTIVE(INP);
-}
-
-/* FIND THE NEXT AVAILABLE SYMBOL BASED OFF OF THE POINTER REFERENCE */
-/* ADDS TO THE SYMBOL RECORD TO VALIDATE WHICH SYMBOLS ARE BEING PASSED THROUGH */
-/* FROM THE SOURCE FILE */
-
-int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
+int FIND_IDENTIFIER(char* LOOK)
 {
-    char* STRING;
-    char QUOTE_SYM;
     int INDEX = 0;
 
-    // INIT SETUP FOR SYMBOL LOOKUP
-    memset(SYM, 0, sizeof(DIRECTIVE_SYM));
-    STRING = *PTR;
-
-    // DETERMINE THE END OF A STRING LITERAL OR EOF
-
-    while(isspace(*STRING)) STRING++; 
-
-    // IS THE POINTER AT THE END OF THE STRING?
-
-    if(*STRING == PARAM_EOS) { *PTR = STRING; } return false;
-
-    // NOW PARSE EACH OF THE CORRESPONDING CHAR DIRECTIVES THAT COULD BE FOUND WITHIN THE SOURCE FILE
-    // THIS RANGES FROM ANY AND ALL SORTS OF ASCII LEXICALS
-
-    switch (*STRING)
+    if((*LOOK) || (*LOOK == UNDERSCORE))
     {
-        case PERIOD:
-            INDEX = FIND_IDENTIFIER(STRING + 1);
-            
-            if(INDEX > 0 && FIND_KEYWORD(KEYWORD_BIT, STRING + 1, INDEX) != NONE)
-            {
-                SYM->TEXT = STRING;
-                SYM->LENGTH = INDEX + 1;
-            }
-
-            else
-            {
-                SYM->ID = ERROR;
-                SYM->TEXT = STRING;
-                SYM->LENGTH = INDEX + 1;
-                SYM->ERROR = "Unrecognised Keyword";
-                *PTR = STRING + SYM->LENGTH;
-            }
-
-            return true;
-
-        case DOLLAR:
-            INDEX = COMPARE_NUMBER(STRING + 1, 16, &(SYM->VALUE));
-
-            if(INDEX > 0)
-            {
-                SYM->ID = NUMBER;
-                SYM->CONTAINS = SYM->VALUE;
-                SYM->TEXT = STRING;
-                SYM->LENGTH = 1 + INDEX;
-                *PTR = STRING + SYM->LENGTH;
-                return true;
-            }
-
-            if(INDEX == 0)
-            {
-                SYM->ID = ADDRESS;
-                SYM->TEXT = STRING;
-                SYM->LENGTH = 1;
-                *PTR = STRING + 1;
-                return true;
-            }
-
-            SYM->ID = ERROR;
-            SYM->TEXT = STRING;
-            SYM->LENGTH = 1 + INDEX;
-            SYM->ERROR = "Malformed Hex value";
-            *PTR = STRING + SYM->LENGTH;
-            return true;
-
-        case QUOTE:
-        case QUOTES:
-
-            QUOTE_SYM = *STRING++;
-            INDEX = FIND_QUOTED(STRING, QUOTE_SYM);
-
-            if(STRING[INDEX] != QUOTE_SYM)
-            {
-                SYM->ID = ERROR;
-                SYM->TEXT = STRING - 1;
-                SYM->LENGTH = INDEX + 1;
-                SYM->ERROR = (QUOTE_SYM = QUOTES) ? "Malformed String Constant" : 0;
-                *PTR = STRING + 1;
-                return true;
-            }
-
-            SYM->ID = (QUOTE_SYM == QUOTE) ? CHAR : 0;
-            SYM->TEXT = STRING;
-            SYM->LENGTH = INDEX;
-            *PTR = STRING + INDEX + 1;
-
-            return true;
-
-    
-        default:
-
-            if(isdigit(*STRING))
-            {
-                SYM->ID = NUMBER;
-                SYM->CONTAINS = SYM->VALUE;
-                SYM->TEXT = STRING;
-                SYM->LENGTH = INDEX + 2;
-                *PTR = STRING + SYM->LENGTH;
-            }
-
-            else
-            {
-                SYM->ID = ERROR;
-                SYM->TEXT = STRING;
-                SYM->LENGTH = INDEX - 1;
-                SYM->ERROR = "Malformed Hex Value";
-                *PTR = STRING + SYM->LENGTH;
-            }
-
-            // HANDLE ALL OTHER PRE-REQS THAT DONT INVOLVE ENUMERATION SUCH AS REGISTERS
-            // OPERANDS, ETC
-
-            HANDLE_IDENTIFIERS(STRING, SYM, (const char**)PTR);
-
-            break;
+        INDEX = 1;
+        LOOK++;
     }
+
+    return INDEX;
 }
 
-bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PTR)
+// FIND A KEYWORD IN THE LOOKUP TABLE
+// THIS IS UNDER THE GUISE OF LOOKING AT A DISASSEMBLY OF THE CURRENT SOURCE FILE
+// SPLIT UP INTO AN INDIVIDUAL HEADER SUCH AS TEXT, BSS, XREF, END
+
+DIRECTIVES FIND_KEYWORD(KEYWORD* KEY, char* FIND, int INDEX)
 {
-    int LENGTH, SYM_TYPE;
-    int REG_NUM = 0;
-    int NEXT_REG;
-    char* CUR_POS = 0;
-
-    // GET IDENTIFIER LENGTH
-
-    LENGTH = FIND_IDENTIFIER(STRING);
-    
-    // HANDLE NON-IDENTIFIER CASES
-
-    if(LENGTH <= 0) 
+    while(KEY->NAME != NULL)
     {
-        SYM_TYPE = FIND_SYMBOL(STRING);
-        if(SYM_TYPE != NONE)
+        if(COMPARE_WORD(FIND, INDEX, KEY->NAME) == 0)
         {
-            *PTR = STRING + 1;
-            return true;
+            return(KEY->ID);
         }
 
-        SYM->ERROR = "UNRECOGNISED SYMBOL";
-        *PTR = STRING + 1;
-        return true;
+        KEY++;
     }
 
-    // CHECK FOR REGISTER
+    return(NONE);
+}
 
-    SYM_TYPE = FIND_REGISTER(CUR_POS, LENGTH, &NEXT_REG);
-    if(SYM_TYPE != NONE)
+// THIS WILL ACT AS THE TOUPPER PARSER TO PROVIDE FOR THE CIRCUMSTANCE
+// BY WHICH OPERANDS, SYMMBOLS AND WHAT HAVE YOU, ARE CAPITALISED AND 
+// ARE NEEDED TO BE PARSED ACCORDINGLY
+
+int COMPARE_WORD(char* CHECK, int LEN, char* FIXED)
+{
+    int CHECKER, WORD;
+
+    while(LEN--)
     {
-        // HANDLE REGISTER LIST
+        if((CHECKER = toupper(*CHECK++)) != (WORD = toupper(*FIXED++))) return(CHECKER - WORD);
+    }
 
-        if(IS_REG_TYPE(SYM_TYPE) && IS_LIST_CHAR(STRING[LENGTH]))
+    return (*FIXED);
+}
+
+// COMPARES THROUGH EACH RESPECTIVE CHAR ITERATION TO DISCERN IF THERE IS A DIGIT
+
+int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE)
+{
+    int RESULT = 0;
+    int DIGIT = 0;
+    int LENGTH = 0;
+
+    bool ERROR = false;
+
+    while((DIGIT = DIGIT_VALUE(*FROM) >= 0))
+    {
+        if(DIGIT < 0) { break; }
+
+        if(DIGIT >= BASE)
         {
-            CUR_POS = STRING + LENGTH;
-            
-            if(SYM_TYPE == ADDRESS_REG)
-                REG_NUM = 8;
-            
-            SYM->REG_NUM = 1 << REG_NUM;
+            ERROR = true;
+        }
 
-            // PROCESS REGISTER LIST
+        else
+        {
+            RESULT = (RESULT * BASE) + DIGIT;
+        }
 
-            while(IS_LIST_CHAR(*CUR_POS))
+        FROM++;
+        LENGTH++;
+    }
+
+    *VALUE = RESULT;
+    return ERROR ? -LENGTH : LENGTH;
+}
+
+DIRECTIVES FIND_SYMBOL(char* FIND)
+{
+    SYM_ID* LOOK;
+
+    for(LOOK = SYM_IDS; LOOK->SYMBOL != PARAM_EOS; LOOK++)
+    {
+        if(*FIND == LOOK->SYMBOL) 
+	{ 
+		PRINT_REGISTER(stdout, "Found Symbol: '%c\n", LOOK->SYMBOL); return LOOK->ID; 
+	}
+    }
+
+    return NONE;
+}
+
+// FIND WHAT LOOKS TO BE A REGISTER DECLARATIVE WITHIN THE DIRECTIVE DEFINTION
+
+DIRECTIVES FIND_REGISTER(char* STRING, int LOOK, int* POS)
+{
+    int RESULT = 0;
+
+    switch (tolower(LOOK))
+    {
+        case 'a':
+		PRINT_REGISTER(stdout, "Address Register 'A%d'\n", RESULT);
+		*POS = RESULT;
+		return ADDRESS_REG;
+
+        case 'd':
+		PRINT_REGISTER(stdout, "Data Register: 'D%d'\n", RESULT);
+            	*POS = RESULT;
+            	return DATA_REG;
+
+        case 'f':
+            if (STRING[1] == 'p' && strlen(STRING) == 3)
             {
-                SYM->LENGTH++;
-
-                LENGTH = FIND_IDENTIFIER(CUR_POS);
-                if(LENGTH <= 0)
+                RESULT = DIGIT_VALUE(STRING[2]);
+                if (RESULT >= 0 && RESULT <= 7)
                 {
-                    SYM->ERROR = "MISSING REGISTER IN LIST";
-                    *PTR = CUR_POS;
-                    return true;
-                }
-
-                SYM_TYPE = FIND_REGISTER(CUR_POS, LENGTH, &NEXT_REG);
-                if(!IS_REG_TYPE(SYM_TYPE))
-                {
-                    SYM->ERROR = "INVALID REGISTER IN LIST";
-                    *PTR = CUR_POS;
-                    return true;
+			PRINT_REGISTER(stdout, "FPU Register: 'FP%d'\n", RESULT);
+                    	*POS = RESULT;
+                    	return FPU_REG;
                 }
             }
+            break;
 
-            *PTR = CUR_POS;
-            return true;
-        }
-
-        // HANDLE SINGLE REGISTER
-
-        SYM->REG_NUM += REG_NUM;
-        *PTR = STRING + SYM->LENGTH;
-        return true;
+        default:
+            break;
     }
 
-    return false;
+    if (strncmp(STRING, "sp", 2) == 0)
+    {
+        PRINT_SEMANTIC(stdout, "SP Register 'A7'\n", RESULT);
+        *POS = 7;
+        return ADDRESS_REG;
+    }
+
+    if (strncmp(STRING, "fp", 2) == 0 && strlen(STRING) == 2)
+    {
+        PRINT_SEMANTIC(stdout, "FP Register 'A6'\n", RESULT);
+        *POS = 6;
+        return ADDRESS_REG;
+    }
+
+    return NONE;
+}
+
+char* PROCESS_INSTRUCTION(INPUT* INPUT)
+{
+    char* ERROR;
+    OPCODE* LOOK;
+
+    if (INPUT->LABEL != NULL) 
+    {
+        ERROR = INPUT->LABEL->TEXT;
+        if (INPUT->LABEL->LENGTH > 0) 
+        {
+            return ERROR;
+        }
+    }
+
+    for(LOOK = INPUT->ACTION->OP; LOOK != NULL; LOOK = LOOK->NEXT)
+    {
+        int* SIZE = 0;
+
+        switch (LOOK->SIZE)
+        {
+            case SIZE_UNDEF: SIZE += (INPUT->SIZE == SIZE_UNDEF); break;
+            case SIZE_BYTE: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_BYTE); break;
+            case SIZE_WORD: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_WORD); break;
+            case SIZE_LONG: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_LONG); break; 
+            
+        
+            default:
+                if((INPUT->SIZE == SIZE_UNDEF) && (LOOK->SIZE & SIZE_WORD))
+                {
+                    INPUT->SIZE = SIZE_WORD;
+                }
+
+                else
+                {
+                    SIZE += ((LOOK->SIZE & INPUT->SIZE) != 0);
+                }
+
+                break;
+        }
+    } 
+
+    // HAVE WE ENCOUNTERED AN ERROR AT ALL?
+
+    if(LOOK == NULL) return( "Invalid Instruction" );
+    return NULL;  
 }

@@ -55,21 +55,6 @@ static SYM_ID SYM_IDS[] =
     {PARAM_EOS             }
 };
 
-static DIRECTIVE DIR_LIST[] = 
-{
-    {TEXT,              NULL},
-    {DATA,              NULL},
-    {BSS,               NULL},
-    {ORG,               NULL},
-    {START,             NULL},
-    {ALIGN,             NULL},
-    {EQU,               NULL},
-    {END,               NULL},
-    {DC,                NULL},
-    {DS,                NULL},
-    {NONE}
-};
-
 //=================================================
 //          MISC. FUNCTIONS AND HANDLERS
 //=================================================
@@ -108,24 +93,14 @@ IDENTIFIER* LOCATE_IDEN(char* VALUE)
 
 DIRECTIVE* FIND_DIRECTIVE(int ID)
 {
-    DIRECTIVE* LOOK;
-
-    for(LOOK = DIR_LIST; LOOK->ID != NONE; LOOK++)
-    {
-        if(LOOK->ID == ID) { return LOOK; }
-    }
-
+    ((void)ID);
     return NULL;
 }
 
 char* PROCESS_DIRECTIVE(INPUT* INPUT)
 {
-    DIRECTIVE* DIR;
-
-    if((DIR = FIND_DIRECTIVE((int)INPUT->LABEL)) == NULL) 
-        return "Directive not implemented";
-    
-    return DIR->DIRECTIVE_ACTION((int)INPUT);
+    ((void)INPUT);
+    return NULL;
 }
 
 // LOOKS FOR A VALID IDENITIFIER BASED ON A POINTER VALUE

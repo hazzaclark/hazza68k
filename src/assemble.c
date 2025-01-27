@@ -72,20 +72,25 @@ OPCODE* FIND_OPCODE(char* MATCH, int LEN)
 int PASS_FILE(FILE* SOURCE)
 {
     char BUFFER[MAX_BIT_ARGS];
-
     int LINE = 0;
+    char* RESULT;
 
     /* ASSUME THERE IS A CURRENT FILE BEING PASSED THROUGH */
     /* EVALUATE LENGTH FROM THE START TO THE END */
 
     while(fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
     {
-        BUFFER[strlen(BUFFER) - 1] = EOF;
+        BUFFER[strcspn(BUFFER, "\n")] = PARAM_EOS;
         LINE++;
+
+        printf("%4d|%s\n", LINE, BUFFER);
 
         /* CHECK THROUGH EACH CORRESPONDING LINE */
 
-        NEXT_LINE(LINE, BUFFER);
+        if((RESULT = PROC_INPUT(BUFFER)) != NULL)
+        {
+            printf("%s\n", BUFFER);
+        }    
     }
 
     return 0;
@@ -98,7 +103,7 @@ int PASS_FILE(FILE* SOURCE)
 char* PROC_INPUT(char* BUFFER)
 {   
     DIRECTIVE_SYM* HEAD, **TAIL, *SYM, *TOP;
-    INPUT* INP = malloc(sizeof(INPUT));
+    INPUT* INP = (INPUT*)malloc(sizeof(INP));
     int LEN = 0;
 
     TAIL = &HEAD;
@@ -134,7 +139,7 @@ char* PROC_INPUT(char* BUFFER)
 
     // INIT BUFFER FOR PARSING LINE
 
-    PARSED* P_LINE = malloc(sizeof(PARSED));
+    PARSED* P_LINE = (PARSED*)malloc(sizeof(P_LINE));
     memset(P_LINE, 0, sizeof(*P_LINE));
     P_LINE->SYM = HEAD;
 
@@ -198,7 +203,7 @@ char* PROC_INPUT(char* BUFFER)
 
             if(SYM->ID == HASH)
             {
-                HEAD = malloc(sizeof(DIRECTIVE_SYM));
+                HEAD = (DIRECTIVE_SYM*)malloc(sizeof(SYM));
                 HEAD->ID = EXP;
                 HEAD->EXPR = TOP;
                 HEAD->NEXT = SYM;

@@ -17,7 +17,7 @@
 int main(int argc, char* argv[])
 {
     FILE* SOURCE;
-    int FILE;
+    int FILE, ERROR;
     char* MESSAGE;
 
     if(argc < 2)
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         DISPLAY_HELP(argv[0]);
     }
 
-    if((FILE = PARSE_ARGS(argc, argv)) <= 0) return(-FILE);
+    if((FILE = PARSE_ARGS(argc, argv)) <= 0) return -FILE;
 
     if((SOURCE = fopen(argv[FILE], "r")) == NULL)
     {
@@ -33,16 +33,33 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    if((MESSAGE = INIT_OUTPUT(argv[FILE])))
+    fprintf(stdout, "-------PROCESSING FILE -------\n");
+
+    if((ERROR = PASS_FILE(SOURCE)))
     {
-        fprintf(stderr, "Initialisation of Output failed: %s\n", MESSAGE);
-        fclose(SOURCE);
-        return -2;
+        fprintf(stderr, "Processing failed: %d\n", ERROR);
     }
 
-    rewind(SOURCE);
-    fclose(SOURCE);
-    END_OUTPUT();
+    if(!ERROR)
+    {
+        if((MESSAGE = INIT_OUTPUT(argv[FILE])))
+        {
+            fprintf(stderr, "Initialisation of output format failed: %s\n", MESSAGE);
+            ERROR = 2;
+        }
+        
+        else
+        {
+            rewind(SOURCE);
+            if((ERROR = PASS_FILE(SOURCE)))
+            {
+                fprintf(stderr, "Output generation failed with %d errors\n", ERROR);
+            }
 
-    return 0;
+            END_OUTPUT();
+        }
+    }
+
+    fclose(SOURCE);
+    return ERROR;
 }

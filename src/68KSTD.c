@@ -18,7 +18,7 @@
 
 static OPTIONS* OPTION_BASE = NULL;
 static int TARGET_CPU = FLAG_68000;
-static OUTPUT* OUTPUT_API;
+static OUTPUT* OUTPUT_API = NULL;
 static FILE* OUTPUT_FILE = NULL;
 static int OPTION_FLAG = OPTION_NONE;
 
@@ -43,39 +43,47 @@ OPTIONS OPTION[] =
 
 char* INIT_OUTPUT(char* SOURCE)
 {
-    char* SUFFIX = 0;
-    char* FILENAME = 0;
+    char* SUFFIX = ".bin";
+    char* FILENAME = NULL;
 
-    // IF THE SUFFIX IS DEFAULT, SET IT TO STDOUT
-
-    if((SUFFIX == NULL) || (OPTION_FLAG & STD_DISPLAY_OUT))
+    if (OPTION_FLAG & STD_DISPLAY_OUT) 
     {
         OUTPUT_FILE = stdout;
-        SUFFIX = ".bin";
-    }
-
-    // OTHERWISE, ACTUALLY PARSE THAT EXTENSION
-
-    else
+    } 
+    else 
     {
-        FILENAME = malloc(strlen(SOURCE) + strlen(SUFFIX) + 1);
+        FILENAME = malloc(strlen(SOURCE) + strlen(SUFFIX) + 1); 
+        if (!FILENAME) 
+        {
+            return "Memory allocation failed for output filename.";
+        }
+
         strcpy(FILENAME, SOURCE);
-        strcpy(FILENAME, SUFFIX);
+        strcat(FILENAME, SUFFIX);
+
+        OUTPUT_FILE = fopen(FILENAME, "w");
+        if (!OUTPUT_FILE) 
+        {
+            free(FILENAME); 
+            return "Unable to open output file.";
+        }
+
+        free(FILENAME); 
     }
 
-    if(OUTPUT_FILE += fopen(FILENAME, "w") == NULL)
+    if (!OUTPUT_API) 
     {
-        return ("Unable to open Output File");
+        return "Output API is not initialized.";
     }
 
     OUTPUT_API->INIT_OUTPUT(SOURCE);
     return NULL;
 }
 
+
 /* PROCESS THE INPUT FILE PROVIDED
 TAKES AN INPUT LINE OF THE ASSEMBLY, BREAKS IT DOWN, IDENTIFIES THE CORRESPONDING
 INPUTS FOR THE SECTION AND HANDLES ACCORDINGLY */
-
 
 /*=================================================
           MISC. FUNCTIONS AND HANDLERS
@@ -116,7 +124,7 @@ int HANDLE_OPTION(const char* ARG)
 
 void DISPLAY_HELP(const char* MESSAGE)
 {
-    printf("Usage: %s OPTION {FILENAME}\n Options:-\n", MESSAGE);
+    printf("Usage: %s OPTION FILENAME\n Options:-\n", MESSAGE);
 
     for(OPTIONS* O = OPTION; O->NAME; O++)
     {

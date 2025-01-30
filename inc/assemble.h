@@ -158,6 +158,17 @@ typedef struct PARSED
 
 } PARSED;
 
+typedef enum
+{
+    NOT_ASM,
+    DATA_PARSE,
+    DATA_VERIF,
+    CODE_GEN
+
+} PASS_MODE;
+
+extern PASS_MODE ASSEMBLER_PASS = NOT_ASM;
+
 //=================================================
 //=================================================
 
@@ -165,8 +176,6 @@ OPCODE* FIND_OPCODE(char* MATCH, int LEN);
 int PASS_FILE(FILE* SOURCE);
 char* PROC_INPUT(char* BUFFER);
 int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM);
-bool HANDLE_IDENTIFIERS(char* STRING, struct DIRECTIVE_SYM* SYM, const char** PTR);
-
 
 void NEXT_LINE(int LINE, char* SOURCE);
 void SET_ADDRESS(U32 ADDRESS);

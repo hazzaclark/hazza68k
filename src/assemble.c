@@ -83,13 +83,19 @@ int PASS_FILE(FILE* SOURCE)
         BUFFER[strcspn(BUFFER, "\n")] = PARAM_EOS;
         LINE++;
 
+        if (strlen(BUFFER) == 0)
+        {
+            fprintf(stderr, "Warning: Skipping empty line %d\n", LINE);
+            continue;
+        }
+
         printf("%4d|%s\n", LINE, BUFFER);
 
         /* CHECK THROUGH EACH CORRESPONDING LINE */
 
         if((RESULT = PROC_INPUT(BUFFER)) != NULL)
         {
-            printf("%s\n", BUFFER);
+            printf("%s\n", LINE, BUFFER, RESULT);
         }    
     }
 
@@ -109,6 +115,8 @@ char* PROC_INPUT(char* BUFFER)
     TAIL = &HEAD;
     SYM = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
     TOP = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
+
+     memset(INP, 0, sizeof(INPUT));
 
     while(NEXT_SYM(&BUFFER, SYM))
     {
@@ -274,6 +282,8 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
     char QUOTE_SYM;
     int INDEX = 0;
 
+    DIRECTIVES ID;
+
     // INIT SETUP FOR SYMBOL LOOKUP
     memset(SYM, 0, sizeof(DIRECTIVE_SYM));
     STRING = *PTR;
@@ -292,21 +302,23 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
     switch (*STRING)
     {
         case PERIOD:
-            INDEX = FIND_IDENTIFIER(STRING + 1);
-            
-            if(INDEX > 0 && FIND_KEYWORD(KEYWORD_BIT, STRING + 1, INDEX) != NONE)
+            if((INDEX = FIND_IDENTIFIER(STRING + 1)) > 0)
             {
-                SYM->TEXT = STRING;
-                SYM->LENGTH = INDEX + 1;
-            }
+                if((SYM->ID = FIND_KEYWORD(KEYWORDS, STRING + 1, INDEX)) != 0)
+                {
+                    SYM->NEXT = STRING;
+                    SYM->LENGTH = 1 + INDEX;
+                    *PTR = STRING + SYM->LENGTH;
+                }
 
-            else
-            {
-                SYM->ID = ERROR;
-                SYM->TEXT = STRING;
-                SYM->LENGTH = INDEX + 1;
-                SYM->ERROR = "Unrecognised Keyword";
-                *PTR = STRING + SYM->LENGTH;
+                else
+                {
+                    SYM->ID = ERROR;
+                    SYM->TEXT = STRING;
+                    SYM->LENGTH = 1 + INDEX;
+                    SYM->ERROR = "Unrecognised Keyword";
+                    *PTR = STRING + SYM->LENGTH;
+                }
             }
 
             return true;

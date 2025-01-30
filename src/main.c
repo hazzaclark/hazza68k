@@ -8,6 +8,7 @@
 
 #include "68KSTD.h"
 #include "assemble.h"
+#include "dictionary.h"
 
 /* SYSTEM INCLUDES */
 
@@ -16,50 +17,20 @@
 
 int main(int argc, char* argv[])
 {
-    FILE* SOURCE;
+    FILE* SOURCE = NULL;
     int FILE, ERROR;
-    char* MESSAGE;
 
-    if(argc < 2)
-    {
-        DISPLAY_HELP(argv[0]);
-    }
+    if((FILE = PARSE_ARGS(argc, argv)) <= 0) return(-FILE);
 
-    if((FILE = PARSE_ARGS(argc, argv)) <= 0) return -FILE;
-
-    if((SOURCE = fopen(argv[FILE], "r")) == NULL)
-    {
-        fprintf(stderr, "Unable to open file '%s'\n", argv[FILE]);
-        return EXIT_FAILURE;
-    }
-
-    fprintf(stdout, "-------PROCESSING FILE -------\n");
+    printf("-------PROCESSING-------\n");
 
     if((ERROR = PASS_FILE(SOURCE)))
     {
-        fprintf(stderr, "Processing failed: %d\n", ERROR);
+        fprintf(stderr, "Unable to Pass File %d", ERROR);
     }
 
-    if(!ERROR)
-    {
-        if((MESSAGE = INIT_OUTPUT(argv[FILE])))
-        {
-            fprintf(stderr, "Initialisation of output format failed: %s\n", MESSAGE);
-            ERROR = 2;
-        }
-        
-        else
-        {
-            rewind(SOURCE);
-            if((ERROR = PASS_FILE(SOURCE)))
-            {
-                fprintf(stderr, "Output generation failed with %d errors\n", ERROR);
-            }
+    INIT_OUTPUT(argv[FILE]);
+    END_OUTPUT();
 
-            END_OUTPUT();
-        }
-    }
-
-    fclose(SOURCE);
-    return ERROR;
+    return 0;
 }

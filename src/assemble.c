@@ -89,6 +89,8 @@ int PASS_FILE(FILE* SOURCE)
             continue;
         }
 
+        NEXT_LINE(LINE, BUFFER);
+
         printf("%4d|%s\n", LINE, BUFFER);
 
         /* CHECK THROUGH EACH CORRESPONDING LINE */
@@ -283,8 +285,6 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
     int INDEX = 0;
     int NTH = 0;
 
-    DIRECTIVES ID;
-
     // INIT SETUP FOR SYMBOL LOOKUP
     memset(SYM, 0, sizeof(DIRECTIVE_SYM));
     STRING = *PTR;
@@ -307,7 +307,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
             {
                 if((SYM->ID = FIND_KEYWORD(KEYWORDS, STRING + 1, INDEX)) != 0)
                 {
-                    SYM->NEXT = STRING;
+                    SYM->NEXT += *STRING;
                     SYM->LENGTH = 1 + INDEX;
                     *PTR = STRING + SYM->LENGTH;
                 }
@@ -417,13 +417,13 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 
             if((INDEX = FIND_IDENTIFIER(STRING)) > 0)
             {
-                if((SYM->ID = FIND_REGISTER(STRING, INDEX, &NTH)) != NONE && SYM->ID == DATA_REG || SYM->ID == ADDRESS_REG)
+                if((SYM->ID = FIND_REGISTER(STRING, INDEX, &NTH)) != NONE && (SYM->ID == DATA_REG || SYM->ID == ADDRESS_REG))
                 {
                     // IS THIS A REGISTER, IF SO, GO FROM THE START OF THE
                     // REGISTER LIST AND WORK OUR WAY THROUGH
 
-                    char REG_CHAR;
-                    bool VALID_REG;
+                    char* REG_CHAR = 0;
+                    bool VALID_REG = false;
 
                     // ASSUMING THAT ALL OF THESE PRE-REQ'S HAVE BEEN MET
                     // WE ARE LIKELY TO ASSUME THAT THE REGISTER LIST
@@ -441,13 +441,49 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 
                     while(VALID_REG && ((*STRING == SLASH) || (*STRING == MINUS)))
                     {
-                        REG_CHAR = *STRING++;
+                        *REG_CHAR = *STRING++;
                         SYM->LENGTH++;
+
+                        if((INDEX = FIND_IDENTIFIER(STRING)) <= 0)
+                        {
+                            VALID_REG = false;
+                            SYM->ID = ERROR;
+                            SYM->ERROR = "Register Name missing";
+                            break;
+                        }
+
+                        INDEX = FIND_REGISTER(STRING, INDEX, &NTH);
+                        STRING += INDEX;
+                        SYM->LENGTH += INDEX;
                     }
+
+                    if((SYM->ID = FIND_KEYWORD(KEYWORDS, STRING, INDEX)) != NONE)
+                    {
+                        SYM->TEXT = STRING;
+                        SYM->LENGTH = INDEX;
+                        *PTR = STRING + INDEX;
+                        return true;
+                    }
+                }
+
+                if((INDEX = FIND_SYMBOL(STRING)) != NONE)
+                {
+                    SYM->ID = INDEX;
+                    SYM->TEXT = STRING;
+                    SYM->LENGTH = 1;
+                    *PTR = STRING + 1;
+                    return true;
                 }
             }
 
             break;
     }
+
+    SYM->ID = ERROR;
+    SYM->TEXT = STRING;
+    SYM->LENGTH = 1;
+    SYM->ERROR = "Unrecognised Symbol";
+    *PTR = STRING + 1;
+    return true;
 }
 

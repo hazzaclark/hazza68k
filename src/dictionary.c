@@ -28,11 +28,12 @@ void ADD_BYTE(U8 DATA) { OUTPUT_API->ADD_BYTE(DATA); }
 void END_OUTPUT(void)
 {
     OUTPUT_API->END_OUTPUT();
-    if(OUTPUT_FILE && OPTION_FLAG & STD_DISPLAY_OUT)
+
+    if((OUTPUT_FILE) && (!(OPTION_FLAG & STD_DISPLAY_OUT)))
     {
         fclose(OUTPUT_FILE);
         OUTPUT_FILE = NULL;
-    }
+    } 
 }
 
 static SYM_ID SYM_IDS[] =
@@ -53,6 +54,21 @@ static SYM_ID SYM_IDS[] =
     {AMPERSAND,         AND},
     {PIPE,               OR},
     {PARAM_EOS             }
+};
+
+static DIRECTIVE DIR_LIST[] = 
+{
+    {TEXT,              NULL},
+    {DATA,              NULL},
+    {BSS,               NULL},
+    {ORG,               NULL},
+    {START,             NULL},
+    {ALIGN,             NULL},
+    {EQU,               NULL},
+    {END,               NULL},
+    {DC,                NULL},
+    {DS,                NULL},
+    {NONE}
 };
 
 //=================================================
@@ -93,14 +109,24 @@ IDENTIFIER* LOCATE_IDEN(char* VALUE)
 
 DIRECTIVE* FIND_DIRECTIVE(int ID)
 {
-    ((void)ID);
+    DIRECTIVE* LOOK;
+
+    for(LOOK = DIR_LIST; LOOK->ID != NONE; LOOK++)
+    {
+        if(LOOK->ID == ID) { return LOOK; }
+    }
+
     return NULL;
 }
 
 char* PROCESS_DIRECTIVE(INPUT* INPUT)
 {
-    ((void)INPUT);
-    return NULL;
+    DIRECTIVE* DIR;
+
+    if((DIR = FIND_DIRECTIVE((int)INPUT->LABEL)) == NULL) 
+        return "Directive not implemented";
+    
+    return DIR->DIRECTIVE_ACTION((int)INPUT);
 }
 
 // LOOKS FOR A VALID IDENITIFIER BASED ON A POINTER VALUE
@@ -226,7 +252,7 @@ DIRECTIVES FIND_REGISTER(char* STRING, int LOOK, int* POS)
                 RESULT = DIGIT_VALUE(STRING[2]);
                 if (RESULT >= 0 && RESULT <= 7)
                 {
-			PRINT_REGISTER(stdout, "FPU Register: 'FP%d'\n", RESULT);
+			            PRINT_REGISTER(stdout, "FPU Register: 'FP%d'\n", RESULT);
                     	*POS = RESULT;
                     	return FPU_REG;
                 }

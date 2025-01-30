@@ -167,14 +167,14 @@ typedef enum
 
 } PASS_MODE;
 
-extern PASS_MODE ASSEMBLER_PASS = NOT_ASM;
+extern PASS_MODE ASSEMBLER_PASS;
 
 //=================================================
 //=================================================
 
 OPCODE* FIND_OPCODE(char* MATCH, int LEN);
 int PASS_FILE(FILE* SOURCE);
-char* PROC_INPUT(char* BUFFER);
+char* PROC_INPUT(int LINE, char* BUFFER);
 int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM);
 
 void NEXT_LINE(int LINE, char* SOURCE);
@@ -185,3 +185,5 @@ void END_OUTPUT(void);
 
 #endif
 #endif
+
+

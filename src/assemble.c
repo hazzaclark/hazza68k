@@ -13,6 +13,7 @@
 #undef USE_DISASM
 
 static MNEOMONIC* MNEOMONIC_BASE = NULL;
+PASS_MODE ASSEMBLER_PASS = NOT_ASM;
 
 KEYWORD KEYWORD_BIT[] = 
 {
@@ -34,7 +35,7 @@ KEYWORD KEYWORDS[] =
 	{ "end",            END         },
 	{ "dc",             DC          },
 	{ "ds",             DS          },
-
+    
 	{ "pc",             PC          },
 	{ "sr",             SR          },
 	{ "ccr",            CCR         },
@@ -73,55 +74,64 @@ int PASS_FILE(FILE* SOURCE)
 {
     char BUFFER[MAX_BIT_ARGS];
     int LINE = 0;
-    char* RESULT;
 
-    /* ASSUME THERE IS A CURRENT FILE BEING PASSED THROUGH */
-    /* EVALUATE LENGTH FROM THE START TO THE END */
+    printf("PASS_FILE: Starting file processing...\n");
 
-    while(fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
+    while (fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
+{
+    int len = strlen(BUFFER);
+    if (len > 0 && BUFFER[len - 1] == '\n') 
     {
-        BUFFER[strcspn(BUFFER, "\n")] = PARAM_EOS;
-        LINE++;
-
-        if (strlen(BUFFER) == 0)
-        {
-            fprintf(stderr, "Warning: Skipping empty line %d\n", LINE);
-            continue;
-        }
-
-        NEXT_LINE(LINE, BUFFER);
-
-        printf("%4d|%s\n", LINE, BUFFER);
-
-        /* CHECK THROUGH EACH CORRESPONDING LINE */
-
-        if((RESULT = PROC_INPUT(BUFFER)) != NULL)
-        {
-            printf("%s\n", LINE, BUFFER, RESULT);
-        }    
+        BUFFER[len - 1] = '\0'; // Remove trailing newline
     }
+
+    LINE++;
+    printf("PASS_FILE: Processing line %d: %s\n", LINE, BUFFER);
+
+    if (ASSEMBLER_PASS == CODE_GEN) 
+    {
+        NEXT_LINE(LINE, BUFFER);
+    }
+
+    printf("%4d|%s\n", LINE, BUFFER);
+
+    printf("PASS_FILE: Calling PROC_INPUT for line %d\n", LINE);
+    char* MSG = PROC_INPUT(LINE, BUFFER);
+    printf("PASS_FILE: Returned from PROC_INPUT for line %d\n", LINE);
+
+    if (MSG != NULL)
+    {
+        printf("PASS_FILE: Error on line %d: %s\n", LINE, MSG);
+    }
+}
+
+
+    printf("PASS_FILE: Finished processing file.\n");
 
     return 0;
 }
+
 
 /* PROCESS THE INPUT PROVIDED FROM THE INPUT LINE */
 /* THE FOLLOWING WILL BREAK DOWN THE CORRESPONDENCE INTO SMALLER SECTIONS */
 /* IN ORDER TO PARSE EXPRESSIONS AND CALLS THE RELEVANT ROUTINE TO HANDLE SAID INPUT */
 
-char* PROC_INPUT(char* BUFFER)
+char* PROC_INPUT(int LINE, char* BUFFER)
 {   
-    DIRECTIVE_SYM* HEAD, **TAIL, *SYM, *TOP;
-    INPUT* INP = (INPUT*)malloc(sizeof(INP));
+    DIRECTIVE_SYM* HEAD = NULL, **TAIL = NULL, *SYM = NULL, *TOP = NULL;    
+    INPUT* INP = malloc(sizeof(INPUT));
     int LEN = 0;
 
     TAIL = &HEAD;
-    SYM = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
-    TOP = (DIRECTIVE_SYM*)malloc(sizeof(DIRECTIVE_SYM));
+    SYM = malloc(sizeof(DIRECTIVE_SYM));
+    TOP = malloc(sizeof(DIRECTIVE_SYM));
 
      memset(INP, 0, sizeof(INPUT));
 
     while(NEXT_SYM(&BUFFER, SYM))
     {
+        printf("Processing line: %d\n", LINE);
+        
         // IF WE ENCOUNTER AN ERROR SYMBOL
 
         if(SYM->ID == ERROR) return(SYM->ERROR);

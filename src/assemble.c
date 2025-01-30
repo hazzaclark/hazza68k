@@ -281,6 +281,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
     char* STRING;
     char QUOTE_SYM;
     int INDEX = 0;
+    int NTH = 0;
 
     DIRECTIVES ID;
 
@@ -377,28 +378,74 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 
     
         default:
+
+            // DETERMINE WHICH SYMBOLS CORRESPOND WITH
+            // THE APPROPRIATE PRE-REQ'S
+
+            // THIS WILL LOOK TO SEE WHAT THE OTHER VARIOUS TYPES ARE
+            // THAT DON'T EXACTLY ENCOMPASS ANYTHING ELSE OUTSIDE OF
+            // WHAT HAS ALREADY BEEN DEFINED
+
             if(isdigit(*STRING))
             {
-                SYM->ID = NUMBER;
-                SYM->CONTAINS = SYM->VALUE;
-                SYM->TEXT = STRING;
-                SYM->LENGTH = INDEX + 2;
-                *PTR = STRING + SYM->LENGTH;
-            }
+                if(*STRING == NONE)
+                {
+                    if((INDEX = COMPARE_NUMBER(STRING + 2, 16, &(SYM->VALUE))) > 0)
+                    {
+                        SYM->ID = NUMBER;
+                        SYM->CONTAINS = SYM->VALUE;
+                        SYM->TEXT = STRING;
+                        SYM->LENGTH = INDEX + 2;
+                        *PTR = STRING + SYM->LENGTH;
+                    }
 
-            else
-            {
-                SYM->ID = ERROR;
-                SYM->TEXT = STRING;
-                SYM->LENGTH = INDEX - 1;
-                SYM->ERROR = "Malformed Hex Value";
-                *PTR = STRING + SYM->LENGTH;
+                    else
+                    {
+                        SYM->ID = ERROR;
+                        SYM->TEXT = STRING;
+                        SYM->LENGTH = -1;
+                        SYM->ERROR = "Malformed Hex Number";
+                        *PTR = STRING + SYM->LENGTH;
+                    }
+                }
+
+                return true;
             }
 
             // HANDLE ALL OTHER PRE-REQS THAT DONT INVOLVE ENUMERATION SUCH AS REGISTERS
             // OPERANDS, ETC
 
-            
+            if((INDEX = FIND_IDENTIFIER(STRING)) > 0)
+            {
+                if((SYM->ID = FIND_REGISTER(STRING, INDEX, &NTH)) != NONE && SYM->ID == DATA_REG || SYM->ID == ADDRESS_REG)
+                {
+                    // IS THIS A REGISTER, IF SO, GO FROM THE START OF THE
+                    // REGISTER LIST AND WORK OUR WAY THROUGH
+
+                    char REG_CHAR;
+                    bool VALID_REG;
+
+                    // ASSUMING THAT ALL OF THESE PRE-REQ'S HAVE BEEN MET
+                    // WE ARE LIKELY TO ASSUME THAT THE REGISTER LIST
+                    // IS VALID - BEING AS THOUGH THERE ARE VALID
+                    // DESCRIPTORS WITHIN THE ASSEMBLY
+
+                    SYM->ID = REG_LIST;
+                    SYM->REG_NUM = INDEX << NTH;
+                    SYM->TEXT = STRING;
+                    SYM->LENGTH = INDEX;
+                    STRING += INDEX;
+                    VALID_REG = true;
+
+                    // NOWE WE CAN EVALUATE ANY OTHER SYMBOLS THAT MIGHT BE PART OF THE DEFINITION
+
+                    while(VALID_REG && ((*STRING == SLASH) || (*STRING == MINUS)))
+                    {
+                        REG_CHAR = *STRING++;
+                        SYM->LENGTH++;
+                    }
+                }
+            }
 
             break;
     }

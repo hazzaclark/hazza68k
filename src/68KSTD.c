@@ -115,33 +115,38 @@ void DISPLAY_HELP(const char* MESSAGE)
 int PARSE_ARGS(int argc, char** argv)
 {
     int INDEX = 0;
-
-    if(argc < 2)
-    {
-        DISPLAY_HELP(argv[0]);
-    }
-
+    int FOUND_FILE = 0;
+    
     for(INDEX = 1; INDEX < argc; INDEX++)
     {
         if(strncmp(argv[INDEX], "--", 2) == 0)
         {
+            OPTIONS* FOUND = NULL;
             for(OPTIONS* O = OPTION; O->NAME != NULL; O++)
             {
-                if(strcmp(argv[INDEX], O->NAME) == 0) break;
+                if(strcmp(argv[INDEX], O->NAME) == 0)
+                {
+                    FOUND = O;  
+                    break;
+                }
             }
-
-            if(OPTION_BASE->NAME != NULL)
+           
+            if(FOUND != NULL)
             {
-                OPTION_FLAG = (OPTION_FLAG & OPTION_BASE->RESET) | OPTION_BASE->SET;
+                OPTION_FLAG = (OPTION_FLAG & FOUND->RESET) | FOUND->SET;
                 TARGET_CPU |= M68K_OPTION_TARGET;
             }
-
             else
             {
                 fprintf(stderr, "Unrecognised Option '%s'\n", argv[INDEX]);
             }
         }
+        else 
+        {
+            FOUND_FILE = 1;
+            break;
+        }
     }
-
-    return (INDEX >= argc) ? 0 : INDEX;
+   
+    return (FOUND_FILE ? INDEX : 0);
 }

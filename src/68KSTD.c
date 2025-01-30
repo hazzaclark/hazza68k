@@ -33,6 +33,23 @@ OPTIONS OPTION[] =
     { NULL, NULL, 0, 0 }
 };
 
+void NULL_INIT_OUTPUT(char* SOURCE) {}
+void NULL_NEXT_LINE(int LINE, char* CODE) {}
+void NULL_SET_ADDRESS(U32 ADDRESS) {}
+void NULL_SET_START(U32 ADDRESS) {}
+void NULL_ADD_BYTE(U8 BYTE) {}
+void NULL_END_OUTPUT(void) {}
+
+static OUTPUT NULL_OUTPUT_API = 
+{
+    NULL_INIT_OUTPUT,
+    NULL_NEXT_LINE,
+    NULL_SET_ADDRESS,
+    NULL_SET_START,
+    NULL_ADD_BYTE,
+    NULL_END_OUTPUT
+};
+
 /*=================================================
             OUTPUT API AND HANDLERS
 =================================================*/
@@ -41,42 +58,45 @@ OPTIONS OPTION[] =
 // THIS WILL LOOK TO SEE WHICH FILE IS BEING ADDED AND FROM THERE, EVALUATE THE
 // EXTENSION SUFFIX READY TO PARSE AND ASSEMBLE
 
+static OUTPUT *OUTPUT_ROUTINE = &NULL_OUTPUT_API;
+
 char* INIT_OUTPUT(char* SOURCE)
 {
-    char* SUFFIX = ".bin";
+    char* SUFFIX = NULL, *DOT = NULL;
     char* FILENAME = NULL;
 
-    if (OPTION_FLAG & STD_DISPLAY_OUT) 
+    switch (OPTION_FLAG)
+    {
+        case STD_DISPLAY_NA:
+            OUTPUT_ROUTINE = &NULL_OUTPUT_API;
+            break;
+    }
+
+    if((SUFFIX == NULL) || (OPTION_FLAG & STD_DISPLAY_OUT))
     {
         OUTPUT_FILE = stdout;
-    } 
-    else 
-    {
-        FILENAME = malloc(strlen(SOURCE) + strlen(SUFFIX) + 1); 
-        if (!FILENAME) 
-        {
-            return "Memory allocation failed for output filename.";
-        }
+    }
 
+    else
+    {
+        FILENAME = malloc(strlen(SOURCE) + strlen(SUFFIX) + 1);
         strcpy(FILENAME, SOURCE);
+
+        if((DOT = strrchr(FILENAME, PERIOD)) != NULL) *DOT = PARAM_EOS;
+
         strcat(FILENAME, SUFFIX);
 
-        OUTPUT_FILE = fopen(FILENAME, "w");
-        if (!OUTPUT_FILE) 
+        if((OUTPUT_FILE = fopen(FILENAME, "w")) == NULL)
         {
-            free(FILENAME); 
-            return "Unable to open output file.";
+            return ("Unable to open Output File");
         }
-
-        free(FILENAME); 
     }
 
-    if (!OUTPUT_API) 
+    if (OUTPUT_API && OUTPUT_API->INIT_OUTPUT) 
     {
-        return "Output API is not initialized.";
+        OUTPUT_API->INIT_OUTPUT(SOURCE);
+    
     }
-
-    OUTPUT_API->INIT_OUTPUT(SOURCE);
     return NULL;
 }
 

@@ -102,26 +102,6 @@ OPTIONS* FIND_OPTION(const char* VALUE)
     return NULL;
 }
 
-// A PRE-REQUISITE TO THE FUNCTION ABOVE IN ORDER TO BE ABLE TO
-// PARSE THE PROVIDED OPTION
-
-int HANDLE_OPTION(const char* ARG)
-{
-    OPTIONS* OPTION_TYPE = FIND_OPTION(ARG);
-
-    if(!OPTION_TYPE)
-    {
-        fprintf(stderr, "Unrecognised Option '%s\n", ARG);
-        return EXIT_FAILURE;
-    }
-
-    OPTION_FLAG = (OPTION_FLAG & OPTION_BASE->RESET) | OPTION_BASE->SET;
-    TARGET_CPU |= M68K_OPTION_TARGET;
-
-    return 0;
-    
-}
-
 void DISPLAY_HELP(const char* MESSAGE)
 {
     printf("Usage: %s OPTION FILENAME\n Options:-\n", MESSAGE);
@@ -136,11 +116,30 @@ int PARSE_ARGS(int argc, char** argv)
 {
     int INDEX = 0;
 
+    if(argc < 2)
+    {
+        DISPLAY_HELP(argv[0]);
+    }
+
     for(INDEX = 1; INDEX < argc; INDEX++)
     {
-        if(strncmp(argv[INDEX], "--", 1) == 0)
+        if(strncmp(argv[INDEX], "--", 2) == 0)
         {
-            if(HANDLE_OPTION(argv[INDEX]) < 0) { return -1; }
+            for(OPTIONS* O = OPTION; O->NAME != NULL; O++)
+            {
+                if(strcmp(argv[INDEX], O->NAME) == 0) break;
+            }
+
+            if(OPTION_BASE->NAME != NULL)
+            {
+                OPTION_FLAG = (OPTION_FLAG & OPTION_BASE->RESET) | OPTION_BASE->SET;
+                TARGET_CPU |= M68K_OPTION_TARGET;
+            }
+
+            else
+            {
+                fprintf(stderr, "Unrecognised Option '%s'\n", argv[INDEX]);
+            }
         }
     }
 

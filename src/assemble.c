@@ -78,38 +78,38 @@ int PASS_FILE(FILE* SOURCE)
     printf("PASS_FILE: Starting file processing...\n");
 
     while (fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
-{
-    int len = strlen(BUFFER);
-    if (len > 0 && BUFFER[len - 1] == '\n') 
     {
-        BUFFER[len - 1] = '\0'; // Remove trailing newline
+        int LEN = strlen(BUFFER);
+        if (LEN > 0 && BUFFER[LEN - 1] == '\n') 
+        {
+            BUFFER[LEN - 1] = '\0'; 
+        }
+
+        LINE++;
+        printf("PASS_FILE: Processing line %d: %s\n", LINE, BUFFER);
+
+        if (ASSEMBLER_PASS == CODE_GEN) 
+        {
+            NEXT_LINE(LINE, BUFFER);
+        }
+
+        printf("%4d|%s\n", LINE, BUFFER);
+
+        printf("PASS_FILE: Calling PROC_INPUT for line %d\n", LINE);
+        char* MSG = PROC_INPUT(LINE, BUFFER);
+        printf("PASS_FILE: Returned from PROC_INPUT for line %d\n", LINE);
+
+        if (MSG != NULL)
+        {
+            printf("PASS_FILE: Error on line %d: %s\n", LINE, MSG);
+        }
     }
-
-    LINE++;
-    printf("PASS_FILE: Processing line %d: %s\n", LINE, BUFFER);
-
-    if (ASSEMBLER_PASS == CODE_GEN) 
-    {
-        NEXT_LINE(LINE, BUFFER);
-    }
-
-    printf("%4d|%s\n", LINE, BUFFER);
-
-    printf("PASS_FILE: Calling PROC_INPUT for line %d\n", LINE);
-    char* MSG = PROC_INPUT(LINE, BUFFER);
-    printf("PASS_FILE: Returned from PROC_INPUT for line %d\n", LINE);
-
-    if (MSG != NULL)
-    {
-        printf("PASS_FILE: Error on line %d: %s\n", LINE, MSG);
-    }
-}
-
 
     printf("PASS_FILE: Finished processing file.\n");
 
     return 0;
 }
+
 
 
 /* PROCESS THE INPUT PROVIDED FROM THE INPUT LINE */

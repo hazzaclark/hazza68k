@@ -43,26 +43,6 @@ void END_OUTPUT(void)
     } 
 }
 
-static SYM_ID SYM_IDS[] =
-{
-    {PLUS,              SYM_PLUS},
-    {MINUS,             SYM_MINUS},
-    {ASTERIX,           MUL},
-    {SLASH,             DIV},
-    {PERCENT,           MOD},
-    {OPAREN,            SYM_OPAREN},
-    {CPAREN,            SYM_CPAREN},
-    {COLON,             SYM_COLON},
-    {SEMICOLON,         SYM_SEMICOLON},
-    {HASH,              SYM_HASH},
-    {COMMA,             SYM_COMMA},
-    {HAT,               EOR},
-    {BANG,              NOT},
-    {AMPERSAND,         AND},
-    {PIPE,               OR},
-    {PARAM_EOS             }
-};
-
 static DIRECTIVE DIR_LIST[] = 
 {
     {TEXT,              NULL},
@@ -273,21 +253,6 @@ int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE)
 
     *VALUE = RESULT;
     return ERROR ? -LENGTH : LENGTH;
-}
-
-DIRECTIVES FIND_SYMBOL(char* FIND)
-{
-    SYM_ID* LOOK;
-
-    for(LOOK = SYM_IDS; LOOK->SYMBOL != PARAM_EOS; LOOK++)
-    {
-        if(*FIND == LOOK->SYMBOL) 
-	{ 
-		PRINT_REGISTER(stdout, "Found Symbol: '%c\n", LOOK->SYMBOL); return LOOK->ID; 
-	}
-    }
-
-    return NONE;
 }
 
 // FIND WHAT LOOKS TO BE A REGISTER DECLARATIVE WITHIN THE DIRECTIVE DEFINTION

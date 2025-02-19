@@ -124,6 +124,42 @@ SCOPE SECTION_SCOPE(void)
     return (SECTION_TO_SCOPE[CURRENT_SECTION->SECTION_BLOCK] | SCOPE_ADDRESS);
 }
 
+void RESET_SECTIONS(void)
+{
+    int INDEX;
+    SECTION_RECORD *PTR;
+
+    switch (ASSEMBLER_PASS)
+    {
+        case DATA_PARSE:
+        {
+            ALL_SECTIONS = NULL;
+            ALL_SECTIONS_TAIL = NULL;
+            CURRENT_SECTION = NULL;
+
+            for(INDEX = 0; INDEX < MAX_SECTIONS; INDEX++)
+            {
+                PTR = (SECTION_RECORD*)malloc(sizeof(PTR));
+                PTR->SECTION_BLOCK = INDEX;
+                PTR->RELATIVE = 1;
+                PTR->EMPTY = 1;
+                PTR->START = START_ADDR;
+                PTR->ADDRESS = START_ADDR;
+                PTR->NEXT = NULL;
+                PTR->FINISH = END_ADDR;
+
+                *ALL_SECTIONS_TAIL = *PTR;
+            }
+
+            CURRENT_SECTION = &PTR[TEXT_SECTION];
+            break;
+        }
+    
+        default:
+            break;
+    }
+}
+
 char* PROCESS_DIRECTIVE(INPUT* INPUT)
 {
     DIRECTIVE* DIR;

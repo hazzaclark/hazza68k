@@ -317,47 +317,46 @@ char* PROC_INPUT(int LINE, char* BUFFER)
 /* ADDS TO THE SYMBOL RECORD TO VALIDATE WHICH SYMBOLS ARE BEING PASSED THROUGH */
 /* FROM THE SOURCE FILE */
 
-int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
+int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 {
-    char STRING;
-    char QUOTE_SYM;
-    int INDEX = 0;
-    int NTH = 0;
+    char* STRING;
+    DIRECTIVES INDEX;
+    int L, NTH;
 
     // INIT SETUP FOR SYMBOL LOOKUP
     memset(SYM, 0, sizeof(DIRECTIVE_SYM));
-    STRING = PTR;
+    STRING = *PTR;
 
     // DETERMINE THE END OF A STRING LITERAL OR EOF
 
-    while(isspace(STRING)) STRING++; 
+    while(isspace(*STRING)) STRING++; 
 
     // IS THE POINTER AT THE END OF THE STRING?
 
-    if(STRING == PARAM_EOS) { PTR = STRING; } return false;
+    if(*STRING == PARAM_EOS) { *PTR = STRING; } return false;
 
     // NOW PARSE EACH OF THE CORRESPONDING CHAR DIRECTIVES THAT COULD BE FOUND WITHIN THE SOURCE FILE
     // THIS RANGES FROM ANY AND ALL SORTS OF ASCII LEXICALS
 
-    switch (STRING)
+    switch (*STRING)
     {
         case PERIOD:
             if((INDEX = FIND_IDENTIFIER(STRING + 1)) > 0)
             {
                 if((SYM->ID = FIND_KEYWORD(KEYWORDS, STRING + 1, INDEX)) != 0)
                 {
-                    SYM->NEXT += STRING;
-                    SYM->LENGTH = 1 + INDEX;
-                    PTR = STRING + SYM->LENGTH;
+                    SYM->TEXT = STRING;
+                    SYM->LENGTH = 1 + L;
+                    *PTR = STRING + SYM->LENGTH;
                 }
 
                 else
                 {
                     SYM->ID = ERROR;
                     SYM->TEXT = STRING;
-                    SYM->LENGTH = 1 + INDEX;
+                    SYM->LENGTH = 1 + L;
                     SYM->ERROR = "Unrecognised Keyword";
-                    PTR = STRING + SYM->LENGTH;
+                    *PTR = STRING + SYM->LENGTH;
                 }
             }
 
@@ -372,7 +371,7 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
                 SYM->CONTAINS = SYM->VALUE;
                 SYM->TEXT = STRING;
                 SYM->LENGTH = 1 + INDEX;
-                PTR = STRING + SYM->LENGTH;
+                *PTR = STRING + SYM->LENGTH;
                 return true;
             }
 
@@ -381,7 +380,7 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
                 SYM->ID = ADDRESS;
                 SYM->TEXT = STRING;
                 SYM->LENGTH = 1;
-                PTR = STRING + 1;
+                *PTR = STRING + 1;
                 return true;
             }
 
@@ -389,31 +388,35 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
             SYM->TEXT = STRING;
             SYM->LENGTH = 1 + INDEX;
             SYM->ERROR = "Malformed Hex value";
-            PTR = STRING + SYM->LENGTH;
+            *PTR = STRING + SYM->LENGTH;
             return true;
 
         case QUOTE:
         case QUOTES:
+        {
+            char QUOTE_SYM;
 
-            QUOTE_SYM = STRING++;
-            INDEX = FIND_QUOTED(STRING, QUOTE_SYM);
+            QUOTE_SYM = *STRING++;
+            L = FIND_QUOTED(STRING, QUOTE_SYM);
 
-            if(STRING != QUOTE_SYM)
+            if(STRING == NULL)
             {
                 SYM->ID = ERROR;
                 SYM->TEXT = STRING - 1;
                 SYM->LENGTH = INDEX + 1;
                 SYM->ERROR = (QUOTE_SYM = QUOTES) ? "Malformed String Constant" : 0;
-                PTR = STRING + 1;
+                *PTR = STRING + 1;
                 return true;
             }
 
             SYM->ID = (QUOTE_SYM == QUOTE) ? CHAR : 0;
             SYM->TEXT = STRING;
             SYM->LENGTH = INDEX;
-            PTR = STRING + INDEX + 1;
+            *PTR = STRING + INDEX + 1;
 
             return true;
+
+        }
 
     
         default:
@@ -425,7 +428,7 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
             // THAT DON'T EXACTLY ENCOMPASS ANYTHING ELSE OUTSIDE OF
             // WHAT HAS ALREADY BEEN DEFINED
 
-            if(isdigit(STRING))
+            if(isdigit(*STRING))
             {
                 if(STRING == NONE)
                 {
@@ -435,7 +438,7 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
                         SYM->CONTAINS = SYM->VALUE;
                         SYM->TEXT = STRING;
                         SYM->LENGTH = INDEX + 2;
-                        PTR = STRING + SYM->LENGTH;
+                        *PTR = STRING + SYM->LENGTH;
                     }
 
                     else
@@ -444,7 +447,7 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
                         SYM->TEXT = STRING;
                         SYM->LENGTH = -1;
                         SYM->ERROR = "Malformed Hex Number";
-                        PTR = STRING + SYM->LENGTH;
+                        *PTR = STRING + SYM->LENGTH;
                     }
                 }
 
@@ -460,10 +463,7 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
                 {
                     // IS THIS A REGISTER, IF SO, GO FROM THE START OF THE
                     // REGISTER LIST AND WORK OUR WAY THROUGH
-
-                    char* REG_CHAR = 0;
-                    bool VALID_REG = false;
-
+                    
                     // ASSUMING THAT ALL OF THESE PRE-REQ'S HAVE BEEN MET
                     // WE ARE LIKELY TO ASSUME THAT THE REGISTER LIST
                     // IS VALID - BEING AS THOUGH THERE ARE VALID
@@ -474,18 +474,15 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
                     SYM->TEXT = STRING;
                     SYM->LENGTH = INDEX;
                     STRING += INDEX;
-                    VALID_REG = true;
 
                     // NOWE WE CAN EVALUATE ANY OTHER SYMBOLS THAT MIGHT BE PART OF THE DEFINITION
 
-                    while(VALID_REG && ((STRING == SLASH) || (STRING == MINUS)))
+                    while(SYM->ID == DATA_REG)
                     {
-                        *REG_CHAR = STRING++;
                         SYM->LENGTH++;
 
                         if((INDEX = FIND_IDENTIFIER(STRING)) <= 0)
                         {
-                            VALID_REG = false;
                             SYM->ID = ERROR;
                             SYM->ERROR = "Register Name missing";
                             break;
@@ -500,17 +497,17 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
                     {
                         SYM->TEXT = STRING;
                         SYM->LENGTH = INDEX;
-                        PTR = STRING + INDEX;
+                        *PTR = STRING + INDEX;
                         return true;
                     }
                 }
 
-                if((INDEX = FIND_SYMBOL(STRING)) != NONE)
+                if((INDEX = FIND_SYMBOL(*STRING)) != NONE)
                 {
                     SYM->ID = INDEX;
                     SYM->TEXT = STRING;
                     SYM->LENGTH = 1;
-                    PTR = STRING + 1;
+                    *PTR = STRING + 1;
                     return true;
                 }
             }
@@ -522,7 +519,7 @@ int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
     SYM->TEXT = STRING;
     SYM->LENGTH = 1;
     SYM->ERROR = "Unrecognised Symbol";
-    PTR = STRING + 1;
+    *PTR = STRING + 1;
     return true;
 }
 

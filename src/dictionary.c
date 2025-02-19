@@ -202,9 +202,12 @@ int FIND_IDENTIFIER(char* LOOK)
 // THIS IS UNDER THE GUISE OF LOOKING AT A DISASSEMBLY OF THE CURRENT SOURCE FILE
 // SPLIT UP INTO AN INDIVIDUAL HEADER SUCH AS TEXT, BSS, XREF, END
 
-int FIND_KEYWORD(KEYWORD* KEYWORDS, char* STRING, int LEN) {
-    for (int i = 0; KEYWORDS[i].NAME != NULL; i++) {
-        if (strncmp(KEYWORDS[i].NAME, STRING, LEN) == 0) {
+int FIND_KEYWORD(KEYWORD* KEYWORDS, char* STRING, int LEN) 
+{
+    for (int i = 0; KEYWORDS[i].NAME != NULL; i++) 
+    {
+        if (strncmp(KEYWORDS[i].NAME, STRING, LEN) == 0) 
+        {
             return KEYWORDS[i].ID;
         }
     }
@@ -215,12 +218,13 @@ int FIND_KEYWORD(KEYWORD* KEYWORDS, char* STRING, int LEN) {
 // BY WHICH OPERANDS, SYMMBOLS AND WHAT HAVE YOU, ARE CAPITALISED AND 
 // ARE NEEDED TO BE PARSED ACCORDINGLY
 
-int COMPARE_WORD(char* FIND, int INDEX, char* NAME) {
-    // Compare the first INDEX characters of FIND and NAME
-    if (strncmp(FIND, NAME, INDEX) == 0 && NAME[INDEX] == '\0') {
-        return 0; // Return 0 if they match
+int COMPARE_WORD(char* FIND, int INDEX, char* NAME) 
+{
+    if (strncmp(FIND, NAME, INDEX) == 0 && NAME[INDEX] == '\0') 
+    {
+        return 0; 
     }
-    return 1; // Return 1 if they don't match
+    return 1;
 }
 
 // COMPARES THROUGH EACH RESPECTIVE CHAR ITERATION TO DISCERN IF THERE IS A DIGIT

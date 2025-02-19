@@ -119,6 +119,11 @@ DIRECTIVE* FIND_DIRECTIVE(int ID)
     return NULL;
 }
 
+SCOPE SECTION_SCOPE(void)
+{
+    return (SECTION_TO_SCOPE[CURRENT_SECTION->SECTION_BLOCK] | SCOPE_ADDRESS);
+}
+
 char* PROCESS_DIRECTIVE(INPUT* INPUT)
 {
     DIRECTIVE* DIR;
@@ -150,35 +155,25 @@ int FIND_IDENTIFIER(char* LOOK)
 // THIS IS UNDER THE GUISE OF LOOKING AT A DISASSEMBLY OF THE CURRENT SOURCE FILE
 // SPLIT UP INTO AN INDIVIDUAL HEADER SUCH AS TEXT, BSS, XREF, END
 
-DIRECTIVES FIND_KEYWORD(KEYWORD* KEY, char* FIND, int INDEX)
-{
-    while(KEY->NAME != NULL)
-    {
-        if(COMPARE_WORD(FIND, INDEX, KEY->NAME) == 0)
-        {
-            return(KEY->ID);
+int FIND_KEYWORD(KEYWORD* KEYWORDS, char* STRING, int LEN) {
+    for (int i = 0; KEYWORDS[i].NAME != NULL; i++) {
+        if (strncmp(KEYWORDS[i].NAME, STRING, LEN) == 0) {
+            return KEYWORDS[i].ID;
         }
-
-        KEY++;
     }
-
-    return(NONE);
+    return NONE;
 }
 
 // THIS WILL ACT AS THE TOUPPER PARSER TO PROVIDE FOR THE CIRCUMSTANCE
 // BY WHICH OPERANDS, SYMMBOLS AND WHAT HAVE YOU, ARE CAPITALISED AND 
 // ARE NEEDED TO BE PARSED ACCORDINGLY
 
-int COMPARE_WORD(char* CHECK, int LEN, char* FIXED)
-{
-    int CHECKER, WORD;
-
-    while(LEN--)
-    {
-        if((CHECKER = toupper(*CHECK++)) != (WORD = toupper(*FIXED++))) return(CHECKER - WORD);
+int COMPARE_WORD(char* FIND, int INDEX, char* NAME) {
+    // Compare the first INDEX characters of FIND and NAME
+    if (strncmp(FIND, NAME, INDEX) == 0 && NAME[INDEX] == '\0') {
+        return 0; // Return 0 if they match
     }
-
-    return (*FIXED);
+    return 1; // Return 1 if they don't match
 }
 
 // COMPARES THROUGH EACH RESPECTIVE CHAR ITERATION TO DISCERN IF THERE IS A DIGIT

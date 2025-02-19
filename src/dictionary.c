@@ -13,6 +13,13 @@ static OUTPUT* OUTPUT_API;
 static FILE* OUTPUT_FILE = NULL;
 static int OPTION_FLAG = OPTION_NONE;
 
+static SECTION_RECORD* ALL_SECTIONS = NULL, 
+                *ALL_SECTIONS_TAIL = NULL,
+                *SECTION_PTR[MAX_SECTIONS],
+                *CURRENT_SECTION = NULL;
+
+static SCOPE SECTION_TO_SCOPE[MAX_SECTIONS] = { SCOPE_TEXT, SCOPE_DATA, SCOPE_BSS };
+
 //=================================================
 //              DICTIONARY HANDLERS
 //=================================================

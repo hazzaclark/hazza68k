@@ -28,6 +28,8 @@
 #define         SIGNED_16BIT_MIN    (-32768)
 #define         SIGNED_16BIT_MAX    32767
 
+#define         MAX_SECTIONS            3
+
 #define DIGIT_VALUE(DIGIT) \
     (((DIGIT) >= '0' && (DIGIT) <= '9') ? ((DIGIT) - '0') : \
     ((DIGIT) >= 'a' && (DIGIT) <= 'f') ? ((DIGIT) - 'a' + 10) : \
@@ -76,6 +78,55 @@ typedef struct SYM_ID
 
 } SYM_ID;
 
+typedef enum SECTIONS
+{
+    SECTION_TEXT = 0,
+    SECTION_DATA = 1,
+    SECTION_BSS = 2
+
+} SECTIONS;
+
+typedef enum SCOPE
+{
+    NO_SCOPE            =       0000000,
+    SCOPE_S8            =       0000001,
+    SCOPE_S16            =       0000002,
+    SCOPE_S32            =       0000004,
+    SCOPE_U8            =       0000010,
+    SCOPE_U16            =       0000020,
+    SCOPE_U32            =       0000040,
+
+    SCOPE_ADRS	= 000100,	
+	SCOPE_TEXT	= 001000,
+	SCOPE_DATA	= 002000,	
+	SCOPE_BSS	= 004000,
+
+	SCOPE_IMPORT	= 010000,
+	SCOPE_EXPORT	= 020000,
+
+	SCOPE_NUMERIC	= SCOPE_S8|SCOPE_S16|SCOPE_S32|SCOPE_U8|SCOPE_U16|SCOPE_U32,
+	SCOPE_ADDRESS	= SCOPE_ADRS|SCOPE_TEXT|SCOPE_DATA|SCOPE_BSS
+
+} SCOPE;
+
+typedef struct SECTION_RECORD
+{
+    SECTIONS SECTION_BLOCK;
+    bool RELATIVE;
+    bool EMPTY;
+
+    S32 START;
+    S32 ADDRESS;
+    S32 FINISH;
+
+    struct SECTION_RECORD* NEXT;
+
+} SECTION_RECORD;
+
+SECTION_RECORD* CURRENT_SECTION = NULL;
+SCOPE SECTION_TO_SCOPE[MAX_SECTIONS] = { SCOPE_TEXT, SCOPE_DATA, SCOPE_BSS };
+SCOPE SECTION_SCOPE(void);
+
 IDENTIFIER* LOCATE_IDEN(char* VALUE);
 DIRECTIVE* FIND_DIRECTIVE(int ID);
 char* PROCESS_DIRECTIVE(INPUT* INPUT);
@@ -84,7 +135,7 @@ char* PROCESS_INPUT(int LINE, char* BUFFER);
 
 
 int FIND_IDENTIFIER(char* LOOK);
-DIRECTIVES FIND_KEYWORD(KEYWORD* KEY, char* FIND, int INDEX);
+int FIND_KEYWORD(KEYWORD* KEYWORDS, char* STRING, int LEN);
 int COMPARE_WORD(char* CHECK, int LEN, char* FIXED);
 int COMPARE_NUMBER(char* FROM, int BASE, unsigned* VALUE);
 

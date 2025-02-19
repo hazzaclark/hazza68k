@@ -127,7 +127,7 @@ SCOPE SECTION_SCOPE(void)
 void RESET_SECTIONS(void)
 {
     int INDEX;
-    SECTION_RECORD *PTR;
+    SECTION_RECORD *PTR = NULL;
 
     switch (ASSEMBLER_PASS)
     {
@@ -154,8 +154,19 @@ void RESET_SECTIONS(void)
             CURRENT_SECTION = &PTR[TEXT_SECTION];
             break;
         }
-    
+
+        case CODE_GEN:
+        {
+            for(INDEX = 0; INDEX < MAX_SECTIONS; INDEX++)
+            {
+                if(PTR->EMPTY) { PTR->FINISH = PTR->ADDRESS - 1; }
+                PTR->ADDRESS = PTR->START;
+                PTR->NEXT = NULL;
+            }
+        }
+
         default:
+            fprintf(stderr, "Invalid Assembler Pass\n");
             break;
     }
 }

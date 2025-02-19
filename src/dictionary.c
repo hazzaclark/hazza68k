@@ -140,6 +140,9 @@ void RESET_SECTIONS(void)
             for(INDEX = 0; INDEX < MAX_SECTIONS; INDEX++)
             {
                 PTR = (SECTION_RECORD*)malloc(sizeof(PTR));
+
+                if(!PTR) { free(PTR); }
+
                 PTR->SECTION_BLOCK = INDEX;
                 PTR->RELATIVE = 1;
                 PTR->EMPTY = 1;

@@ -20,6 +20,11 @@ static SECTION_RECORD* ALL_SECTIONS = NULL,
 
 static SCOPE SECTION_TO_SCOPE[MAX_SECTIONS] = { SCOPE_TEXT, SCOPE_DATA, SCOPE_BSS };
 
+static S32 SECTION_ADDRESS(void)
+{
+    return(CURRENT_SECTION->ADDRESS);
+}
+
 //=================================================
 //              DICTIONARY HANDLERS
 //=================================================
@@ -323,14 +328,14 @@ char* PROCESS_INSTRUCTION(INPUT* INPUT)
 
     for(LOOK = INPUT->ACTION->OP; LOOK != NULL; LOOK = LOOK->NEXT)
     {
-        int* SIZE = 0;
+        int SIZE = 0;
 
         switch (LOOK->SIZE)
         {
-            case SIZE_UNDEF: SIZE += (INPUT->SIZE == SIZE_UNDEF); break;
-            case SIZE_BYTE: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_BYTE); break;
-            case SIZE_WORD: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_WORD); break;
-            case SIZE_LONG: SIZE += (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_LONG); break; 
+            case SIZE_UNDEF: SIZE = (INPUT->SIZE == SIZE_UNDEF); break;
+            case SIZE_BYTE: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_BYTE); break;
+            case SIZE_WORD: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_WORD); break;
+            case SIZE_LONG: SIZE = (INPUT->SIZE == SIZE_UNDEF || INPUT->SIZE == SIZE_LONG); break; 
             
         
             default:
@@ -346,10 +351,11 @@ char* PROCESS_INSTRUCTION(INPUT* INPUT)
 
                 break;
         }
-    } 
+    }
 
     // HAVE WE ENCOUNTERED AN ERROR AT ALL?
 
     if(LOOK == NULL) return( "Invalid Instruction" );
+
     return NULL;  
 }

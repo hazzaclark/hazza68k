@@ -15,6 +15,21 @@
 static MNEOMONIC* MNEOMONIC_BASE = NULL;
 PASS_MODE ASSEMBLER_PASS = NOT_ASM;
 
+static DIR_CHAR DIR_CHARS[] = 
+{
+    {PLUS,      SYM_PLUS},
+    {MINUS,     SYM_MINUS},
+    {ASTERIX,   MUL},
+    {SLASH,     DIV},
+    {PERCENT,   MOD},
+    {OPAREN,    SYM_OPAREN},
+    {CPAREN,    SYM_CPAREN},
+    {COLON,     SYM_COLON},
+    {SEMICOLON, SYM_SEMICOLON},
+    {HASH,      SYM_HASH},
+    {COMMA,     SYM_COMMA},
+};
+
 KEYWORD KEYWORD_BIT[] = 
 {
     { "b",              BYTE        },
@@ -46,6 +61,13 @@ KEYWORD KEYWORDS[] =
 	{ NULL }
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+//
+//                      MISCELLANEOUS FUNCTIONS AND HANDLERS
+//         - WHICH WOULD BE IN THEIR RESPECTIVE HEADER FILE BY GCC IS ANNOYING    
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
+
 /*=================================================
           OPCODE AND OPTION HANDLERS
 =================================================*/
@@ -70,47 +92,54 @@ OPCODE* FIND_OPCODE(char* MATCH, int LEN)
     return NULL;
 }
 
+DIRECTIVE_SYM* RESOLVE_DIR(DIRECTIVE_SYM* FROM, int INDEX)
+{
+    while((INDEX--) && (FROM != NULL))
+    {
+        FROM = FROM->NEXT;
+    }
+
+    return(FROM);
+}
+
+DIRECTIVES FIND_SYMBOL(char FIND)
+{
+    DIR_CHAR* LOOK;
+
+    for(LOOK = DIR_CHARS; LOOK->SYM != PARAM_EOS; LOOK++)
+    {
+        if(FIND == LOOK->SYM) { printf("Found Symbol: %c\n", LOOK->SYM); }
+        return(LOOK->ID);
+    }
+
+    return(NONE);
+}
+
 int PASS_FILE(FILE* SOURCE)
 {
     char BUFFER[MAX_BIT_ARGS];
+    char* MSG;
+
     int LINE = 0;
+    int ERROR = 0;
 
-    printf("PASS_FILE: Starting file processing...\n");
-
-    while (fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
+    while(fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
     {
-        int LEN = strlen(BUFFER);
-        if (LEN > 0 && BUFFER[LEN - 1] == '\n') 
-        {
-            BUFFER[LEN - 1] = '\0'; 
-        }
-
+        BUFFER[strlen(BUFFER) - 1] = PARAM_EOS;
         LINE++;
-        printf("PASS_FILE: Processing line %d: %s\n", LINE, BUFFER);
 
-        if (ASSEMBLER_PASS == CODE_GEN) 
-        {
-            NEXT_LINE(LINE, BUFFER);
-        }
+        if(ASSEMBLER_PASS == CODE_GEN) NEXT_LINE(LINE, BUFFER);
 
         printf("%4d|%s\n", LINE, BUFFER);
 
-        printf("PASS_FILE: Calling PROC_INPUT for line %d\n", LINE);
-        char* MSG = PROC_INPUT(LINE, BUFFER);
-        printf("PASS_FILE: Returned from PROC_INPUT for line %d\n", LINE);
-
-        if (MSG != NULL)
+        if((MSG = PROC_INPUT(LINE, BUFFER)) != NULL)
         {
-            printf("PASS_FILE: Error on line %d: %s\n", LINE, MSG);
+            printf("%4d|%s\n, |%s\n", LINE, BUFFER, MSG);
         }
     }
-
-    printf("PASS_FILE: Finished processing file.\n");
-
-    return 0;
+    
+    return (ERROR);
 }
-
-
 
 /* PROCESS THE INPUT PROVIDED FROM THE INPUT LINE */
 /* THE FOLLOWING WILL BREAK DOWN THE CORRESPONDENCE INTO SMALLER SECTIONS */
@@ -288,38 +317,38 @@ char* PROC_INPUT(int LINE, char* BUFFER)
 /* ADDS TO THE SYMBOL RECORD TO VALIDATE WHICH SYMBOLS ARE BEING PASSED THROUGH */
 /* FROM THE SOURCE FILE */
 
-int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
+int NEXT_SYM(char PTR, DIRECTIVE_SYM* SYM)
 {
-    char* STRING;
+    char STRING;
     char QUOTE_SYM;
     int INDEX = 0;
     int NTH = 0;
 
     // INIT SETUP FOR SYMBOL LOOKUP
     memset(SYM, 0, sizeof(DIRECTIVE_SYM));
-    STRING = *PTR;
+    STRING = PTR;
 
     // DETERMINE THE END OF A STRING LITERAL OR EOF
 
-    while(isspace(*STRING)) STRING++; 
+    while(isspace(STRING)) STRING++; 
 
     // IS THE POINTER AT THE END OF THE STRING?
 
-    if(*STRING == PARAM_EOS) { *PTR = STRING; } return false;
+    if(STRING == PARAM_EOS) { PTR = STRING; } return false;
 
     // NOW PARSE EACH OF THE CORRESPONDING CHAR DIRECTIVES THAT COULD BE FOUND WITHIN THE SOURCE FILE
     // THIS RANGES FROM ANY AND ALL SORTS OF ASCII LEXICALS
 
-    switch (*STRING)
+    switch (STRING)
     {
         case PERIOD:
             if((INDEX = FIND_IDENTIFIER(STRING + 1)) > 0)
             {
                 if((SYM->ID = FIND_KEYWORD(KEYWORDS, STRING + 1, INDEX)) != 0)
                 {
-                    SYM->NEXT += *STRING;
+                    SYM->NEXT += STRING;
                     SYM->LENGTH = 1 + INDEX;
-                    *PTR = STRING + SYM->LENGTH;
+                    PTR = STRING + SYM->LENGTH;
                 }
 
                 else
@@ -328,7 +357,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                     SYM->TEXT = STRING;
                     SYM->LENGTH = 1 + INDEX;
                     SYM->ERROR = "Unrecognised Keyword";
-                    *PTR = STRING + SYM->LENGTH;
+                    PTR = STRING + SYM->LENGTH;
                 }
             }
 
@@ -343,7 +372,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                 SYM->CONTAINS = SYM->VALUE;
                 SYM->TEXT = STRING;
                 SYM->LENGTH = 1 + INDEX;
-                *PTR = STRING + SYM->LENGTH;
+                PTR = STRING + SYM->LENGTH;
                 return true;
             }
 
@@ -352,7 +381,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                 SYM->ID = ADDRESS;
                 SYM->TEXT = STRING;
                 SYM->LENGTH = 1;
-                *PTR = STRING + 1;
+                PTR = STRING + 1;
                 return true;
             }
 
@@ -360,29 +389,29 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
             SYM->TEXT = STRING;
             SYM->LENGTH = 1 + INDEX;
             SYM->ERROR = "Malformed Hex value";
-            *PTR = STRING + SYM->LENGTH;
+            PTR = STRING + SYM->LENGTH;
             return true;
 
         case QUOTE:
         case QUOTES:
 
-            QUOTE_SYM = *STRING++;
+            QUOTE_SYM = STRING++;
             INDEX = FIND_QUOTED(STRING, QUOTE_SYM);
 
-            if(STRING[INDEX] != QUOTE_SYM)
+            if(STRING != QUOTE_SYM)
             {
                 SYM->ID = ERROR;
                 SYM->TEXT = STRING - 1;
                 SYM->LENGTH = INDEX + 1;
                 SYM->ERROR = (QUOTE_SYM = QUOTES) ? "Malformed String Constant" : 0;
-                *PTR = STRING + 1;
+                PTR = STRING + 1;
                 return true;
             }
 
             SYM->ID = (QUOTE_SYM == QUOTE) ? CHAR : 0;
             SYM->TEXT = STRING;
             SYM->LENGTH = INDEX;
-            *PTR = STRING + INDEX + 1;
+            PTR = STRING + INDEX + 1;
 
             return true;
 
@@ -396,9 +425,9 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
             // THAT DON'T EXACTLY ENCOMPASS ANYTHING ELSE OUTSIDE OF
             // WHAT HAS ALREADY BEEN DEFINED
 
-            if(isdigit(*STRING))
+            if(isdigit(STRING))
             {
-                if(*STRING == NONE)
+                if(STRING == NONE)
                 {
                     if((INDEX = COMPARE_NUMBER(STRING + 2, 16, &(SYM->VALUE))) > 0)
                     {
@@ -406,7 +435,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                         SYM->CONTAINS = SYM->VALUE;
                         SYM->TEXT = STRING;
                         SYM->LENGTH = INDEX + 2;
-                        *PTR = STRING + SYM->LENGTH;
+                        PTR = STRING + SYM->LENGTH;
                     }
 
                     else
@@ -415,7 +444,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                         SYM->TEXT = STRING;
                         SYM->LENGTH = -1;
                         SYM->ERROR = "Malformed Hex Number";
-                        *PTR = STRING + SYM->LENGTH;
+                        PTR = STRING + SYM->LENGTH;
                     }
                 }
 
@@ -449,9 +478,9 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
 
                     // NOWE WE CAN EVALUATE ANY OTHER SYMBOLS THAT MIGHT BE PART OF THE DEFINITION
 
-                    while(VALID_REG && ((*STRING == SLASH) || (*STRING == MINUS)))
+                    while(VALID_REG && ((STRING == SLASH) || (STRING == MINUS)))
                     {
-                        *REG_CHAR = *STRING++;
+                        *REG_CHAR = STRING++;
                         SYM->LENGTH++;
 
                         if((INDEX = FIND_IDENTIFIER(STRING)) <= 0)
@@ -471,7 +500,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                     {
                         SYM->TEXT = STRING;
                         SYM->LENGTH = INDEX;
-                        *PTR = STRING + INDEX;
+                        PTR = STRING + INDEX;
                         return true;
                     }
                 }
@@ -481,7 +510,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
                     SYM->ID = INDEX;
                     SYM->TEXT = STRING;
                     SYM->LENGTH = 1;
-                    *PTR = STRING + 1;
+                    PTR = STRING + 1;
                     return true;
                 }
             }
@@ -493,7 +522,7 @@ int NEXT_SYM(char** PTR, DIRECTIVE_SYM* SYM)
     SYM->TEXT = STRING;
     SYM->LENGTH = 1;
     SYM->ERROR = "Unrecognised Symbol";
-    *PTR = STRING + 1;
+    PTR = STRING + 1;
     return true;
 }
 

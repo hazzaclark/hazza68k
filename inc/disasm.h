@@ -24,6 +24,9 @@
 #else
 #define USE_DISASM
 
+#define		START_ADDR		0x00000000
+#define		END_ADDR		0xFFFFFFFF
+
 #define     SIZE_BYTE       0x01
 #define     SIZE_SHORT      0x02
 #define     SIZE_WORD       0x03
@@ -46,6 +49,7 @@
 #define EA_AREG_IND_DISP_REG   0x000040
 #define EA_ABS_SHORT_IND       0x000080
 #define EA_ABS_LONG_IND        0x000100
+
 #define EA_PC_IND_DISP         0x000200
 #define EA_PC_IND_DISP_REG     0x000400
 #define EA_IMMEDIATE           0x000800

@@ -118,26 +118,29 @@ DIRECTIVES FIND_SYMBOL(char FIND)
 int PASS_FILE(FILE* SOURCE)
 {
     char BUFFER[MAX_BIT_ARGS];
-    char* MSG;
 
     int LINE = 0;
     int ERROR = 0;
 
-    while(fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
+    while (fgets(BUFFER, MAX_BIT_ARGS, SOURCE))
     {
-        BUFFER[strlen(BUFFER) - 1] = PARAM_EOS;
+        size_t LEN = strlen(BUFFER);
+        if (LEN > 0 && BUFFER[LEN - 1] == '\n') 
+        {
+            BUFFER[LEN - 1] = PARAM_EOS;  
+        } 
+        else 
+        {
+            BUFFER[LEN] = PARAM_EOS; 
+        }
+
         LINE++;
 
-        if(ASSEMBLER_PASS == CODE_GEN) NEXT_LINE(LINE, BUFFER);
+        if (ASSEMBLER_PASS == CODE_GEN) NEXT_LINE(LINE, BUFFER);
 
         printf("%4d|%s\n", LINE, BUFFER);
-
-        if((MSG = PROC_INPUT(LINE, BUFFER)) != NULL)
-        {
-            printf("%4d|%s\n, |%s\n", LINE, BUFFER, MSG);
-        }
     }
-    
+
     return (ERROR);
 }
 
